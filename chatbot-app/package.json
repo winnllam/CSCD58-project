@@ -1,0 +1,14 @@
+{
+  "name": "chatbot-app",
+  "version": "1.0.0",
+  "description": "CSCD58 Fall 2022 Final Project",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Jin Rong Cao, Michelle Kee, Winnie Lam",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^21.3.0"
+  }
+}
