@@ -10,5 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^21.3.0"
+  },
+  "dependencies": {
+    "python-shell": "^3.0.1"
   }
 }
