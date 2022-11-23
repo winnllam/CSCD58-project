@@ -1,1 +1,30 @@
 <a href="home.html">temp back button</a>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Politic Bot</title>
+    <script type="text/javascript" src="chat.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline';"
+    />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" href="./font-awesome/css/font-awesome.min.css">
+  </head>
+  <body>
+
+    <div id="chat" class="box chat-box">
+      <h1 class="bot-name">Canada Federal Bot</h1>
+    
+      <div class="chat bot-chat"> 
+        <p>Hello! How can I help today?</p>
+      </div>
+    
+      <div class="input-area">
+        <input placeholder="Type message.." id="input" class="input-chat" type="text" required></input>
+        <button id="send" onclick="sendMessage()"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </body>
