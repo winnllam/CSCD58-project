@@ -1,10 +1,11 @@
-# echo-server.py
-
 import socket
-import scapy
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+
+# TODO: Send SYN_ACK after receing SYN from client
+def send_syn_ack():
+    return
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -20,7 +21,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 break
             conn.sendall(data)
 
-# TODO: Send SYN_ACK after receing SYN from client
-def send_syn_ack():
-    return
+
 
