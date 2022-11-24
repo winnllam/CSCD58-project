@@ -1,0 +1,6 @@
+API = 'http://api.openparliament.ca'
+BILLS = 'bills'
+VOTES = 'votes'
+POLITICIANS = 'politicians'
+DEBATES = 'debates'
+COMMITTEES = 'committees'
