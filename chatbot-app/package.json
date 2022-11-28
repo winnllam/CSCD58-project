@@ -12,6 +12,7 @@
     "electron": "^21.3.0"
   },
   "dependencies": {
+    "net": "^1.0.2",
     "python-shell": "^3.0.1",
     "ws": "^8.11.0"
   }
