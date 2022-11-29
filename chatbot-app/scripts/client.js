@@ -1,5 +1,6 @@
 var dgram = require("dgram");
 const { Buffer } = require("node:buffer");
+const struct = require("python-struct");
 
 var host = "127.0.0.1";
 var send_port = 65432;
@@ -29,5 +30,10 @@ function startConnection() {
       info.address,
       info.port
     );
+
+    // TODO: Decode the data
+    struct.sizeOf("!HHIIBHHHHII");
+    var data = struct.unpack("!HHIIBHHHHII", Buffer.from(msg, "hex"));
+    console.log("Decoded struct is " + data);
   });
 }
