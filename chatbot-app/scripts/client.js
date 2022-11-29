@@ -1,7 +1,7 @@
 var dgram = require("dgram");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
-const packetType = "!HHIIBHHHHII";
+const packetType = "!HHIIBBHHHII";
 
 var host = "127.0.0.1";
 var send_port = 65432;
@@ -52,7 +52,14 @@ class TCPPacket {
     dst_port,
     seq_num,
     ack_num,
-    flags = 0,
+    cwr = 0,
+    ece = 0,
+    urg = 0,
+    ack = 0,
+    psh = 0,
+    rst = 0,
+    syn = 0,
+    fin = 0,
     checksum = 0,
     options = 0,
     data = 0
@@ -61,21 +68,29 @@ class TCPPacket {
     this.dst_port = dst_port;
     this.seq_num = seq_num;
     this.ack_num = ack_num;
-    this.flags = flags;
+    this.cwr = cwr;
+    this.ece = ece;
+    this.urg = urg;
+    this.ack = ack;
+    this.psh = psh;
+    this.rst = rst;
+    this.syn = syn;
+    this.fin= fin;
     this.checksum = checksum;
     this.options = options;
     this.data = data;
   }
 
   encode() {
+    flags = str(this.cwr) + str(this.ece) + str(this.urg) + str(this.ack) + str(this.psh) + str(this.rst) + str(this.syn) + str(this.fin)
     return struct.pack(
-      "!HHIIBHHHHII",
+      "!HHIIBBHHHII",
       this.src_port,
       this.dst_port,
       this.seq_num,
       this.ack_num,
       0,
-      this.flags,
+      flags,
       0,
       0,
       0,
