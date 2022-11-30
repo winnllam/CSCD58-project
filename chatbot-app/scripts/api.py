@@ -1,6 +1,6 @@
 import requests
 import json
-from constants import (API, BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES, PAGINATION, PREV, NEXT, OBJECTS, URL)
+from constants import (API, LIMIT, LIMIT_VAL, BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES, PAGINATION, PREV, NEXT, OBJECTS, URL)
 
 class OpenParlimentApi:
     endpoint = ''
@@ -12,6 +12,7 @@ class OpenParlimentApi:
     def __init__(self, endpoint, params):
         self.endpoint = endpoint
         self.params = params
+        self.params[LIMIT] = LIMIT_VAL
     
     # Main function to call the Open Parliment API, returns result (maybe parsed)
     def get_data(self, url=''):
@@ -75,13 +76,13 @@ class OpenParlimentApi:
         
 
 
-params = {
-    'family_name': 'Trudeau'
-}
-api = OpenParlimentApi(BILLS, {})
-text = json.dumps(api.get_data(), sort_keys=True, indent=4)
-print(text)
-next_text = json.dumps(api.get_next(), sort_keys=True, indent=4)
-print(next_text)
-sub = json.dumps(api.get_sub_data('/bills/37-1/C-40/'), sort_keys=True, indent=4)
-print(sub)
+# params = {
+#     'family_name': 'Trudeau'
+# }
+# api = OpenParlimentApi(BILLS, {})
+# text = json.dumps(api.get_data(), sort_keys=True, indent=4)
+# print(text)
+# next_text = json.dumps(api.get_next(), sort_keys=True, indent=4)
+# print(next_text)
+# sub = json.dumps(api.get_sub_data('/bills/37-1/C-40/'), sort_keys=True, indent=4)
+# print(sub)
