@@ -90,7 +90,7 @@ class TCPPacket {
       this.seq_num,
       this.ack_num,
       0,
-      flags,
+      int(flags.encode(), base=2),
       0,
       0,
       0,
