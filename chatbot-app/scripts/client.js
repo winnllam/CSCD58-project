@@ -2,6 +2,19 @@ var dgram = require("dgram");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const packetType = "!HHIIBBHHHII";
+const packetIndices = {
+  sourcePort: 0,
+  destPort: 1,
+  sequence: 2,
+  ack: 3,
+  data: 4,
+  flags: 5,
+  window: 6,
+  checksum: 7,
+  urgent: 8,
+  options: 9,
+  data: 10,
+};
 
 var host = "127.0.0.1";
 var send_port = 65432;
@@ -16,8 +29,9 @@ window.startConnection = function () {
 
   // TODO: 1234 - should be listen_port?
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
+  pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
-  console.log(pkt.encode());
+  console.log(pkt);
   client.send(pkt.encode(), send_port, host, (err) => {});
 
   console.log("Info sent");
@@ -31,7 +45,6 @@ window.startConnection = function () {
   });
 
   client.on("message", function (msg, info) {
-    console.log("Data received from server : " + msg);
     console.log(
       "Received %d bytes from %s:%d\n",
       msg.length,
@@ -42,8 +55,17 @@ window.startConnection = function () {
     // TODO: Decode the data
     // struct.sizeOf(packetType);
     // var data = struct.unpack(packetType, Buffer.from(msg, "hex"));
-    // console.log("Decoded struct is " + data);
     var data = pkt.decode(msg);
+    console.log(
+      "Decoded struct is " +
+        data +
+        " which is type of " +
+        typeof data +
+        " with properties " +
+        Object.keys(data)
+    );
+    console.log("Flag is " + data[packetIndices.flags]);
+    // Decoded struct is 1234,65432,1,1,0,0,0,0,0,0,0 which is type of objectwith properties 0,1,2,3,4,5,6,7,8,9,10
 
     // Check if the syn = ack = 1
   });
@@ -115,6 +137,14 @@ class TCPPacket {
 
   decode(data) {
     var unpacked = struct.unpack(packetType, Buffer.from(data, "hex"));
-    return newTCPPacket();
+    return unpacked;
+  }
+
+  updateProp(prop, newValue) {
+    this[prop] = newValue;
+  }
+
+  flags(flagNum) {
+    var flagBinary = flagnum.toString(2);
   }
 }
