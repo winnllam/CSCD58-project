@@ -6,9 +6,7 @@ class TCPPacket:
         self.dst_port = dst_port
         self.seq_num = seq_num
         self.ack_num = ack_num
-        # data offsetp
-        # reserved 3 bits
-        # THESE ARE FLAGS
+        # data offset + ns 
         self.cwr = cwr
         self.ece = ece
         self.urg = urg
@@ -17,34 +15,36 @@ class TCPPacket:
         self.rst = rst
         self.syn = syn
         self.fin = fin
-        # window --skip
+        # window
         self.checksum = checksum
-        # urgent pointer --skip
+        # urgent pointer
         self.options = options
         self.data = data
 
     # Build the data to byte object
-    # https://docs.python.org/3.7/library/struct.html#format-characters
+    # https://docs.python.org/3.7/library/struct.html#format-characters ex. 4s = string of 2 bytes
+
+    # Pack Structure Overview: 
     # ! = network byte order (big-endian)
-    # 4s = string of 2 bytes
-    # H Source Port - 2 bytes (16 bits)  unsighed short, standard size 2
-    # H Destination Port - 2 bytes character
-    # I Sequence Number - 4 bytes integer (32 bits) unsighed int, standard size 4
-    # I Acknowledgement Number - 4 bytes integer (32 bits)
-    # B Data offset + Res
-    # B Flags cwr-fin
-    # H Window
-    # H Checksum - INTIALIZE 0 
-    # H Urgent Pointer
-    # I Options + Padding
-    # I Data TODO: can be more? 
+    # H Source Port - 2 bytes unsighed short
+    # H Destination Port - 2 bytes unsighed short
+    # I Sequence Number - 4 bytes unsighed int
+    # I Acknowledgement Number - 4 bytes unsighed int
+    # B Data offset & Res & NS - 1 byte unsigned char *UNUSED*
+    # B Flags CWR to FIN - 1 byte unsigned char
+    # H Window - 2 bytes unsighed short *UNUSED* 
+    # H Checksum - 2 bytes unsighed short *INIT TO ZERO* TODO: make proper checksum
+    # H Urgent Pointer - 2 bytes unsighed short *UNUSED*
+    # I Options + Padding - 4 bytes unsighed int
+    # I Data - 4 bytes unsighed int TODO: allocate more space, maybe type should be s (char)
+
+    # TODO: we may want to lower sized of *UNUSED* since it's irrelevant to our implementation.
+    # Focus is in TCP handshake and encryption, not other optimization methods. 
 
     def encode (self):
+        # Converts the flags directly to a byte string. 0 is no flag, 1 represents flag active
         flags = str(self.cwr) + str(self.ece) + str(self.urg) + str(self.ack) + str(self.psh) + str(self.rst) + str(self.syn) + str(self.fin)
-        return struct.pack("!HHIIBBHHHII", self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, flags, 0, 0, 0, self.options, self.data)
+        return struct.pack("!HHIIBBHHHII", self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options, self.data)
 
     def decode (self):
         return struct.unpack("!HHIIBBHHHII", self)
-
-
-
