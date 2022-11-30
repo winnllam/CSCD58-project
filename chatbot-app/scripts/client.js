@@ -14,7 +14,8 @@ window.startConnection = function () {
   // const message = Buffer.from("Hello World");
   // client.send(message, send_port, host, (err) => {});
 
-  var pkt = new TCPPacket(1234, send_port, 1, 1);
+  // TODO: 1234 - should be listen_port?
+  var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   console.log("Client is sending the following packet:");
   console.log(pkt.encode());
   client.send(pkt.encode(), send_port, host, (err) => {});
@@ -43,6 +44,8 @@ window.startConnection = function () {
     // var data = struct.unpack(packetType, Buffer.from(msg, "hex"));
     // console.log("Decoded struct is " + data);
     var data = pkt.decode(msg);
+
+    // Check if the syn = ack = 1
   });
 };
 
@@ -75,14 +78,25 @@ class TCPPacket {
     this.psh = psh;
     this.rst = rst;
     this.syn = syn;
-    this.fin= fin;
+    this.fin = fin;
     this.checksum = checksum;
     this.options = options;
     this.data = data;
   }
 
   encode() {
-    flags = str(this.cwr) + str(this.ece) + str(this.urg) + str(this.ack) + str(this.psh) + str(this.rst) + str(this.syn) + str(this.fin)
+    var flags =
+      this.cwr.toString() +
+      this.ece.toString() +
+      this.urg.toString() +
+      this.ack.toString() +
+      this.psh.toString() +
+      this.rst.toString() +
+      this.syn.toString() +
+      this.fin.toString();
+
+    var flagDecimal = parseInt(flags, 2);
+
     return struct.pack(
       "!HHIIBBHHHII",
       this.src_port,
@@ -90,7 +104,7 @@ class TCPPacket {
       this.seq_num,
       this.ack_num,
       0,
-      int(flags.encode(), base=2),
+      flagDecimal,
       0,
       0,
       0,
@@ -100,6 +114,7 @@ class TCPPacket {
   }
 
   decode(data) {
-    return struct.unpack(packetType, Buffer.from(data, "hex"));
+    var unpacked = struct.unpack(packetType, Buffer.from(data, "hex"));
+    return newTCPPacket();
   }
 }
