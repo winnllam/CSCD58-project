@@ -48,6 +48,3 @@ class TCPPacket:
 
     def decode (self):
         return struct.unpack("!HHIIBBHHHII", self)
-
-
-
