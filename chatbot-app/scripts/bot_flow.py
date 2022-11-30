@@ -7,7 +7,11 @@ from constants import (API, LIMIT, LIMIT_VAL, BILLS, VOTES, POLITICIANS, DEBATES
 # only the main api topics are available bc idc
 list_of_topics = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES]
 print("Here are the available topics to search about: ")
+print("0: Exit")
+for i in range(len(list_of_topics)):
+    print(str(i + 1) + ": " + list_of_topics[i])
 topic_input = 0
+print(topic_input + 1)
 
 # use the index from the list to determine which api to hit
 topic = list_of_topics[topic_input]
@@ -35,15 +39,30 @@ api = OpenParlimentApi(topic, filters)
 # print(text)
 
 # put each one separate in a list so we can use indexing to know which one they want
-text_list = api.get_data().values()
+text_list = list(api.get_data().values())
 print(text_list)
 print("here is the output we found: ")
+
+if (api.prev_url != None):
+    print("0: Previous 5")
 for i in range(len(text_list)):
-    print(str(i + 1) + ". " + text_list[i])
+    print(str(i + 1) + ". " + text_list[i][URL])
+if (api.next_url != None):
+    print("6: Next 5")
+
+# if they want to go to previous or next page, output those lists
+page_input = 6
+print(page_input)
+next_list = list(api.get_next().values())
+if (api.prev_url != None):
+    print("0: Previous 5")
+for i in range(len(next_list)):
+    print(str(i + 1) + ". " + next_list[i][URL])
+if (api.next_url != None):
+    print("6: Next 5")
 
 # ask if they want to see one of the specific outputs
-# we output the key/url for them to select
-
-# need an option for prev and next (if applicable)
-
-# then we hit that end point
+page_input = 1
+print(page_input)
+# should display this text nicer
+print(api.get_sub_data(next_list[page_input][URL]))
