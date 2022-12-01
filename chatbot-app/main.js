@@ -11,11 +11,14 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
 
   // and load the index.html of the app.
   mainWindow.loadFile("components/home.html");
+  mainWindow.openDevTools();
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
