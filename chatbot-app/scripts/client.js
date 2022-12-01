@@ -3,7 +3,9 @@ var dgram = require("dgram");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const internal = require("stream");
-const packetType = "!HHIIBBHHHII";
+
+// Constant variables
+const packetType = "!HHIIBBHHHI300p";
 const packetIndices = {
   sourcePort: 0,
   destPort: 1,
@@ -96,6 +98,7 @@ function print_as_bot(html) {
   document.getElementById("chat").innerHTML += html;
 }
 
+// TCP Packet
 class TCPPacket {
   constructor(
     src_port,
