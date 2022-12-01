@@ -4,7 +4,7 @@ const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 
 // Constant variables
-const packetType = "!HHIIBBHHHII";
+const packetType = "!HHIIBBHHHI2300p";
 const packetIndices = {
   sourcePort: 0,
   destPort: 1,
@@ -58,6 +58,7 @@ window.startConnection = function () {
   });
 };
 
+// TCP Packet class declaration
 class TCPPacket {
   constructor(
     src_port,
@@ -113,7 +114,7 @@ class TCPPacket {
     var flagDecimal = parseInt(flags, 2);
 
     return struct.pack(
-      "!HHIIBBHHHII",
+      packetType,
       this.src_port,
       this.dst_port,
       this.seq_num,
