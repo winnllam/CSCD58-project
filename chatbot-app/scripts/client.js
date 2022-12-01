@@ -82,7 +82,7 @@ window.startConnection = function () {
 };
 
 var chat_input = new Array();
-const valid_number_warning = '<div class="chat bot-chat"><p>Please enter a valid number!</p></div>';
+const valid_number_warning = 'Please enter a valid number!';
 
 function parse() {
   var text = document.getElementById("input").value;
@@ -114,8 +114,8 @@ function parse() {
   } 
 }
 
-function print_as_bot(html) {
-  document.getElementById("chat").innerHTML += html;
+function print_as_bot(text) {
+  document.getElementById("chat").innerHTML += '<div class="chat bot-chat"><p>' + text + '</p></div>';
 }
 
 class TCPPacket {
