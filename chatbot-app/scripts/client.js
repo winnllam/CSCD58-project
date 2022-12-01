@@ -52,7 +52,7 @@ window.startConnection = function () {
     );
 
     // TODO: Decode the data
-    // var data = pkt.decode(msg);
+    var data = pkt.decode(msg);
     // console.log(
     //   "Decoded struct is " +
     //     data +
@@ -71,6 +71,8 @@ window.startConnection = function () {
     // Check if the syn = ack = 1
     if (pkt.syn == 1 && pkt.ack == 1) {
       console.log("We have syn == 1 && pack == 1!");
+      console.log(pkt);
+      pkt.updateProp("syn", 0);
       client.send(pkt.encode(), send_port, host, (err) => {});
     }
   });
