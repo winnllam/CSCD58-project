@@ -47,6 +47,3 @@ class TCPPacket:
         flags = str(self.cwr) + str(self.ece) + str(self.urg) + str(self.ack) + \
             str(self.psh) + str(self.rst) + str(self.syn) + str(self.fin)
         return struct.pack("!HHIIBBHHHII", self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options, self.data)
-
-    def decode(self):
-        return struct.unpack("!HHIIBBHHHII", self)
