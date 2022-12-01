@@ -89,6 +89,7 @@ function parse() {
   // check if the input is a valid number
   if (isNaN(text)) {
     print_as_bot(valid_number_warning); 
+    return;
   }
 
   // check if the input is for the first question in the flow (which topic)
