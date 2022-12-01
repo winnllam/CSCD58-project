@@ -46,4 +46,4 @@ class TCPPacket:
         # Converts the flags directly to a byte string. 0 is no flag, 1 represents flag active
         flags = str(self.cwr) + str(self.ece) + str(self.urg) + str(self.ack) + \
             str(self.psh) + str(self.rst) + str(self.syn) + str(self.fin)
-        return struct.pack("!HHIIBBHHHII", self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options, self.data)
+        return struct.pack("!HHIIBBHHHI300p", self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options, self.data)
