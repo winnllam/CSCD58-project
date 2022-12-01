@@ -2,9 +2,8 @@
 var dgram = require("dgram");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
-
-// Constant variables
-const packetType = "!HHIIBBHHHI2300p";
+const internal = require("stream");
+const packetType = "!HHIIBBHHHII";
 const packetIndices = {
   sourcePort: 0,
   destPort: 1,
@@ -55,10 +54,48 @@ window.startConnection = function () {
       pkt.updateProp("syn", 0);
       client.send(pkt.encode(), send_port, host, (err) => {});
     }
+
+    window.location.href = "../components/chat.html";
   });
 };
 
-// TCP Packet class declaration
+var chat_input = new Array();
+const valid_number_warning =
+  '<div class="chat bot-chat"><p>Please enter a valid number!</p></div>';
+
+function parse() {
+  var text = document.getElementById("input").value;
+  // check if the input is a valid number
+  if (isNaN(text)) {
+    print_as_bot(valid_number_warning);
+  }
+
+  // check if the input is for the first question in the flow (which topic)
+  if (chat_input.length == 0) {
+    // check if the input is a valid number in terms of range
+    var input_num = parseInt(text);
+    // TODO: change to constant list length value
+    if (input_num < 0 || input_num > 5) {
+      print_as_bot(valid_number_warning);
+    } else {
+      // save the input selection
+      chat_input.push(input_num);
+      console.log(chat_input);
+
+      // output the next selection menu
+      // TODO: it should be based on the constant list again
+    }
+  }
+
+  // check if input is for the second question in the flow (filters)
+  if (chat_input.length == 1) {
+  }
+}
+
+function print_as_bot(html) {
+  document.getElementById("chat").innerHTML += html;
+}
+
 class TCPPacket {
   constructor(
     src_port,
