@@ -11,11 +11,13 @@ PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 
 
 def send_syn_ack(s, client_host, client_port):
-    pkt = TCPPacket(src_port=PORT, dst_port=CLIENT_PORT, seq_num=2, ack_num=1, syn=1, ack=1)
+    pkt = TCPPacket(src_port=PORT, dst_port=client_port,
+                    seq_num=2, ack_num=1, syn=1, ack=1)
     print("The server is sending the following packet:")
     print(pkt.encode())
     s.sendto(pkt.encode(), (client_host, client_port))
     return
+
 
 def receive_syn(s):
     data, addr = s.recvfrom(1024)
@@ -23,11 +25,13 @@ def receive_syn(s):
     # TODO: process data, check if SYN flag is on, then return addr otherwise null
     return addr
 
+
 def receive_tcp_connection(s):
     addr = receive_syn(s)
     if not addr:
         return
     send_syn_ack(s, addr[0], addr[1])
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind((HOST, PORT))
