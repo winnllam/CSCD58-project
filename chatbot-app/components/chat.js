@@ -4,3 +4,4 @@ function sendMessage(){
         document.getElementById("chat").innerHTML += '<div class="chat user-chat"><p>' + text + '</p></div>';
     }
 }
+
