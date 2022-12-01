@@ -60,7 +60,38 @@ def receive_tcp_connection(s):
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind((HOST, PORT))
+    # List of addresses (host, port) where the connection is established
     connections = []
+    # List of addresses (host, port) where we are awaiting to receive ACK packet to confirm connection
+    ack_waiting = []
+    # TODO: low-prio, timeout time for ack_waiting.
+    ack_timeouts = []
     while True:
-        connections.append(receive_tcp_connection(s))
+        # When a packet is received it can be...
+        # A: TCP connection
+            # receive SYN - Send SYN-ACK
+            # receive ACK - Connection established
+        # B: Data from established connection
+        
+        # Receive packet data and process it
         data, addr = s.recvfrom(1024)
+        pkt = decode_packet(data)
+        pkt_flag = decode_packet_flag_byte(data)
+
+        # Case 1: SYN request
+        if (pkt_flag == "00000010"):
+            # Syn request received, so send SYN-ACK
+            send_syn_ack(s, addr[0], addr[1])
+            # Wait for ACK response
+            ack_waiting.append(addr)
+        # Case 2: ACK request 
+        elif (pkt_flag == "00010000" and addr in ack_waiting):
+            # Establish connection, ready to receive
+            ack_waiting.remove(addr)
+            connections.append(addr)
+        # Case 3: Connection is already established
+        elif (addr in connections):
+            # TODO: do something with the data
+            # Process the request, send stuff back.
+
+        # TODO: closing connection
