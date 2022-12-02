@@ -55,6 +55,7 @@
 
 .bot-chat {
     background-color: rgb(212, 212, 212);
+    clear: right;
 }
 
 .user-chat {
