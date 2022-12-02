@@ -7,23 +7,21 @@ import struct
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-PACKET_TYPE = "!HHIIBBHHHI300p"
 
 # Helper function to decode packet from byte to TCPPacket structure
 
 
 def decode_packet(data):
-    decoded_data = struct.unpack(PACKET_TYPE, data)
+    decoded_data = struct.unpack("!HHIIBBHHHII", data)
     flag_byte = bin(decoded_data[5])[2:].rjust(8, '0')
-    received_packet = TCPPacket(src_port=decoded_data[0], dst_port=decoded_data[1], seq_num=int(decoded_data[2])+1, ack_num=decoded_data[3], cwr=flag_byte[0], ece=flag_byte[1],
-                                urg=flag_byte[2], ack=flag_byte[3], psh=flag_byte[4], rst=flag_byte[5], syn=flag_byte[6], fin=flag_byte[7], checksum=decoded_data[6], options=decoded_data[7], data=decoded_data[8])
+    received_packet = TCPPacket(src_port=decoded_data[0], dst_port=decoded_data[1], seq_num=int(decoded_data[2])+1, ack_num=decoded_data[3], cwr=flag_byte[0], ece=flag_byte[1], urg=flag_byte[2], ack=flag_byte[3], psh=flag_byte[4], rst=flag_byte[5], syn=flag_byte[6], fin=flag_byte[7], checksum=decoded_data[6], options=decoded_data[7], data=decoded_data[8])
     return received_packet
 
 # Helper fuynction to decode packet from byte form, and return the flag byte string
 
 
 def decode_packet_flag_byte(data):
-    decoded_data = struct.unpack(PACKET_TYPE, data)
+    decoded_data = struct.unpack("!HHIIBBHHHII", data)
     flag_byte = bin(decoded_data[5])[2:].rjust(8, '0')
     return flag_byte
 
@@ -39,8 +37,7 @@ def receive_ack(s):
 
 
 def send_syn_ack(s, client_host, client_port):
-    pkt = TCPPacket(src_port=PORT, dst_port=client_port,
-                    seq_num=2, ack_num=1, syn=1, ack=1)
+    pkt = TCPPacket(src_port=PORT, dst_port=client_port, seq_num=2, ack_num=1, syn=1, ack=1)
     print("SYN-ACK: The server is sending the following packet:")
     print(pkt.encode())
     s.sendto(pkt.encode(), (client_host, client_port))

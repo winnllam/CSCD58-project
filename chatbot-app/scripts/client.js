@@ -30,8 +30,8 @@ const COMMITTEES = "committees";
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
-TOPICS = {
-    BILLS: {
+const TOPICS = {
+    [BILLS]: {
         "introduced": "Date bill was introduced in the format yyyy-mm-dd",
         "legisinfo_id": "ID assigned by parl.gc.ca's LEGISinfo",
         "private_member_bill": "Is it a private member's bill? True or False",
@@ -39,7 +39,7 @@ TOPICS = {
         "number": "ex. C-10",
         "session": "Session number, ex. 41-1"
     },
-    VOTES: {
+    [VOTES]: {
         "bill": "ex. /bills/41-1/C-10/",
         "nay_total": "votes against",
         "yea_total": "votes for",
@@ -48,18 +48,18 @@ TOPICS = {
         "number": "every vote in a session has a sequential number",
         "result": "Passed, Failed, Tie"
     },
-    POLITICIANS: {
+    [POLITICIANS]: {
         "family_name": "ex. Harper",
         "given_name": "ex. Stephen",
         "include": "'former' to show former MPs (since 94), 'all' for current and former",
         "name": "ex. Stephen Harper"
     },
-    DEBATES: {
+    [DEBATES]: {
         "date": "ex. 2010-01-01",
         "number": "Each Hansard in a session is given a sequential #",
         "session": "ex. 41-1"
     },
-    COMMITTEES: {
+    [COMMITTEES]: {
         "session": "??"
     }
 };
@@ -100,12 +100,9 @@ window.startConnection = function () {
       console.log(pkt);
       pkt.updateProp("syn", 0);
       client.send(pkt.encode(), send_port, host, (err) => {});
-
-      // Update the sequence number as the server does not reply
-      current_seq = current_seq + 1;
-
-      window.location.href = "../components/chat.html";
     }
+
+    window.location.href = "../components/chat.html";
   });
 };
 
@@ -201,7 +198,7 @@ class TCPPacket {
     checksum = 0,
     urgent = 0,
     options = 0,
-    data = ""
+    data = 0
   ) {
     this.src_port = src_port;
     this.dst_port = dst_port;
@@ -237,7 +234,7 @@ class TCPPacket {
     var flagDecimal = parseInt(flags, 2);
 
     return struct.pack(
-      packetType,
+      "!HHIIBBHHHII",
       this.src_port,
       this.dst_port,
       this.seq_num,
@@ -263,7 +260,6 @@ class TCPPacket {
 
   updateRecieveData(data) {
     this.seq_num = data[packetIndices.seq_num] + 1;
-    current_seq = this.seq_num;
     this.ack_num = data[packetIndices.ack_num];
     this.data_offset = data[packetIndices.data_offset];
     this.flags(data[packetIndices.flags]);

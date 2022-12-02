@@ -2,7 +2,7 @@ import struct
 
 
 class TCPPacket:
-    def __init__(self, src_port, dst_port, seq_num, ack_num, cwr=int(0), ece=int(0), urg=int(0), ack=int(0), psh=int(0), rst=int(0), syn=int(0), fin=int(0), checksum=0, options=0, data=""):
+    def __init__(self, src_port, dst_port, seq_num, ack_num, cwr=int(0), ece=int(0), urg=int(0), ack=int(0), psh=int(0), rst=int(0), syn=int(0), fin=int(0), checksum=0, options=0, data=0):
         self.src_port = src_port
         self.dst_port = dst_port
         self.seq_num = seq_num
