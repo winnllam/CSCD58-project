@@ -113,6 +113,9 @@ const filter_value = 'What value are you filtering for?';
 
 function parse() {
   let text = document.getElementById("input").value;
+  if (text != "") {
+    print_as_user(text);
+  }
   let input_length = chat_input.length;
 
   // check if the input is for the first question in the flow (which topic)
@@ -204,6 +207,11 @@ function parse() {
   console.log(chatDataPacket);
   client.send(chatDataPacket.encode(), send_port, host, (err) => {});
   console.log("DATA Info sent");
+}
+
+// Print text into the user bubble
+function print_as_user(text) {
+  document.getElementById("chat").innerHTML += '<div class="chat user-chat"><p>' + text + '</p></div>';
 }
 
 // Print text into a chat bot bubble
