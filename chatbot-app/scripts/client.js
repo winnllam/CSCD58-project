@@ -106,6 +106,11 @@ window.startConnection = function () {
   });
 };
 
+function scroll_to_bottom() {
+  var elem = document.getElementById('chat');
+  elem.scrollTop = elem.scrollHeight;
+}
+
 var chat_input = new Array();
 var topic = "";
 const valid_number_warning = 'Please enter a valid number!';
@@ -212,11 +217,13 @@ function parse() {
 // Print text into the user bubble
 function print_as_user(text) {
   document.getElementById("chat").innerHTML += '<div class="chat user-chat"><p>' + text + '</p></div>';
+  scroll_to_bottom();
 }
 
 // Print text into a chat bot bubble
 function print_as_bot(text) {
   document.getElementById("chat").innerHTML += '<div class="chat bot-chat"><p>' + text + '</p></div>';
+  scroll_to_bottom();
 }
 
 // Print selection menu based on a dictionary
