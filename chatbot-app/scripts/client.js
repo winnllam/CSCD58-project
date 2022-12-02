@@ -19,14 +19,16 @@ const packetIndices = {
   options: 9,
   data: 10,
 };
+var current_seq = 0;
 
 // Connection settings
 const host = "127.0.0.1";
 const send_port = 65432;
 const listen_port = 65433;
+const num_options = 8;
+var client = dgram.createSocket("udp4");
 
 window.startConnection = function () {
-  var client = dgram.createSocket("udp4");
   client.bind(listen_port, host);
 
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
@@ -55,9 +57,12 @@ window.startConnection = function () {
       console.log(pkt);
       pkt.updateProp("syn", 0);
       client.send(pkt.encode(), send_port, host, (err) => {});
-    }
 
-    window.location.href = "../components/chat.html";
+      // Update the sequence number as the server does not reply
+      current_seq = current_seq + 1;
+
+      window.location.href = "../components/chat.html";
+    }
   });
 };
 
@@ -92,6 +97,27 @@ function parse() {
   // check if input is for the second question in the flow (filters)
   if (chat_input.length == 1) {
   }
+
+  // Send this data to the server
+  // TODO: Fix with the real array afterwards
+  var chat_input_dummy = new Array();
+  for (let i = 0; i < 1 + num_options; i++) {
+    if (i == 0) {
+      chat_input_dummy.push("0");
+    } else {
+      chat_input_dummy.push("");
+    }
+  }
+  var chat_data_string = chat_input_dummy.join("|");
+
+  // TODO: Determine is ack_num always 1?
+  var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
+  chatDataPacket.updateProp("data", chat_data_string);
+
+  console.log("Client is sending the following DATA packet:");
+  console.log(chatDataPacket);
+  client.send(chatDataPacket.encode(), send_port, host, (err) => {});
+  console.log("DATA Info sent");
 }
 
 function print_as_bot(html) {
@@ -118,7 +144,7 @@ class TCPPacket {
     checksum = 0,
     urgent = 0,
     options = 0,
-    data = 0
+    data = ""
   ) {
     this.src_port = src_port;
     this.dst_port = dst_port;
@@ -180,6 +206,7 @@ class TCPPacket {
 
   updateRecieveData(data) {
     this.seq_num = data[packetIndices.seq_num] + 1;
+    current_seq = this.seq_num;
     this.ack_num = data[packetIndices.ack_num];
     this.data_offset = data[packetIndices.data_offset];
     this.flags(data[packetIndices.flags]);
