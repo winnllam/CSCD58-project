@@ -19,8 +19,8 @@ topic = LIST_OF_TOPICS[topic_input - 1]
 # use the dictionares to list out the options and description 
 print("Here are the available filters for the topic xxx")
 sub_topics = TOPICS[topic]
-for st in sub_topics:
-    print(st + ": " + sub_topics[st])
+for i in range(len(sub_topics)):
+    print(str(i+1) + ". " + sub_topics[i][0] + ": " + sub_topics[i][1])
 
 # they can choose to add multiple filters on
 filters = {}
