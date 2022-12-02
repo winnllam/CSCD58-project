@@ -13,7 +13,7 @@ topic_input = 0
 print(topic_input + 1)
 
 # use the index from the list to determine which api to hit
-topic = LIST_OF_TOPICS[topic_input]
+topic = LIST_OF_TOPICS[topic_input - 1]
 
 # depending on what they want to ask about, we give the sub options that are specific to each topic
 # use the dictionares to list out the options and description 

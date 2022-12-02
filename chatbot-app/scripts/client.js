@@ -21,6 +21,49 @@ const packetIndices = {
 };
 var current_seq = 0;
 
+// API constant variables
+const BILLS = "bills";
+const VOTES = "votes";
+const POLITICIANS = "politicians";
+const DEBATES = "debates";
+const COMMITTEES = "committees";
+
+const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
+
+TOPICS = {
+    BILLS: {
+        "introduced": "Date bill was introduced in the format yyyy-mm-dd",
+        "legisinfo_id": "ID assigned by parl.gc.ca's LEGISinfo",
+        "private_member_bill": "Is it a private member's bill? True or False",
+        "law": "Did it become law? True or False",
+        "number": "ex. C-10",
+        "session": "Session number, ex. 41-1"
+    },
+    VOTES: {
+        "bill": "ex. /bills/41-1/C-10/",
+        "nay_total": "votes against",
+        "yea_total": "votes for",
+        "session": "ex. 41-1",
+        "date": "ex. 2011-01-01",
+        "number": "every vote in a session has a sequential number",
+        "result": "Passed, Failed, Tie"
+    },
+    POLITICIANS: {
+        "family_name": "ex. Harper",
+        "given_name": "ex. Stephen",
+        "include": "'former' to show former MPs (since 94), 'all' for current and former",
+        "name": "ex. Stephen Harper"
+    },
+    DEBATES: {
+        "date": "ex. 2010-01-01",
+        "number": "Each Hansard in a session is given a sequential #",
+        "session": "ex. 41-1"
+    },
+    COMMITTEES: {
+        "session": "??"
+    }
+};
+
 // Connection settings
 const host = "127.0.0.1";
 const send_port = 65432;
@@ -68,6 +111,7 @@ window.startConnection = function () {
 
 var chat_input = new Array();
 const valid_number_warning = 'Please enter a valid number!';
+const type_filter = 'Please enter what you want to filter for'
 
 function parse() {
   var text = document.getElementById("input").value;
@@ -81,21 +125,24 @@ function parse() {
   if (chat_input.length == 0) {
     // check if the input is a valid number in terms of range
     var input_num = parseInt(text);
-    // TODO: change to constant list length value
-    if (input_num < 0 || input_num > 5) {
+    if (input_num < 0 || input_num > LIST_OF_TOPICS.length) {
       print_as_bot(valid_number_warning);
     } else {
-      // save the input selection
+      // save the input selection number
       chat_input.push(input_num);
       console.log(chat_input);
 
       // output the next selection menu
-      // TODO: it should be based on the constant list again
+      topic = LIST_OF_TOPICS[input_num - 1]
+      print_selection_menu(TOPICS[topic]);
+      // leave since we still need the filter input before sending to server
+      return;
     }
   }
 
   // check if input is for the second question in the flow (filters)
   if (chat_input.length == 1) {
+    // TODO: 
   }
 
   // Send this data to the server
@@ -120,8 +167,18 @@ function parse() {
   console.log("DATA Info sent");
 }
 
+// Print text into a chat bot bubble
 function print_as_bot(text) {
   document.getElementById("chat").innerHTML += '<div class="chat bot-chat"><p>' + text + '</p></div>';
+}
+
+// Print selection menu based on a dictionary
+function print_selection_menu(sub_topics) {
+  let text = "Select a filter you would like to add: <br>";
+  for (const [key, value] of Object.entries(sub_topics)) {
+    text += key + ": " + value + "<br>";
+  }
+  print_as_bot(text);
 }
 
 // TCP Packet
