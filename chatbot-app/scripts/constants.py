@@ -8,6 +8,8 @@ POLITICIANS = "politicians"
 DEBATES = "debates"
 COMMITTEES = "committees"
 
+LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES]
+
 TOPICS = {
     BILLS: {
         "introduced": "Date bill was introduced in the format yyyy-mm-dd",

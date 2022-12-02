@@ -1,20 +1,19 @@
 
 import json
 from api import OpenParlimentApi;
-from constants import (API, LIMIT, LIMIT_VAL, BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES, TOPICS, PAGINATION, PREV, NEXT, OBJECTS, URL)
+from constants import (API, LIMIT, LIMIT_VAL, BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES, LIST_OF_TOPICS, TOPICS, PAGINATION, PREV, NEXT, OBJECTS, URL)
 
 # give the user a list of stuff we offer for them to know about
 # only the main api topics are available bc idc
-list_of_topics = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES]
 print("Here are the available topics to search about: ")
 print("0: Exit")
-for i in range(len(list_of_topics)):
-    print(str(i + 1) + ": " + list_of_topics[i])
+for i in range(len(LIST_OF_TOPICS)):
+    print(str(i + 1) + ": " + LIST_OF_TOPICS[i])
 topic_input = 0
 print(topic_input + 1)
 
 # use the index from the list to determine which api to hit
-topic = list_of_topics[topic_input]
+topic = LIST_OF_TOPICS[topic_input]
 
 # depending on what they want to ask about, we give the sub options that are specific to each topic
 # use the dictionares to list out the options and description 
