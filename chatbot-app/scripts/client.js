@@ -72,10 +72,9 @@ const send_port = 65432;
 const listen_port = 65433;
 const num_options = 8;
 var client = dgram.createSocket("udp4");
+client.bind(listen_port, host);
 
 window.startConnection = function () {
-  client.bind(listen_port, host);
-
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
@@ -119,6 +118,9 @@ const valid_number_warning = "Please enter a valid number!";
 const filter_value = "What value are you filtering for?";
 
 function parse() {
+  // TODO: Determine is ack_num always 1?
+  var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
+
   let text = document.getElementById("input").value;
   if (text != "") {
     print_as_user(text);
@@ -191,27 +193,38 @@ function parse() {
       print_selection_menu(TOPICS[topic]);
     }
   }
+}
 
-  // Send this data to the server
-  // TODO: Fix with the real array afterwards
-  var chat_input_dummy = new Array();
-  for (let i = 0; i < 1 + num_options; i++) {
-    if (i == 0) {
-      chat_input_dummy.push("0");
-    } else {
-      chat_input_dummy.push("");
-    }
-  }
-  var chat_data_string = chat_input_dummy.join("|");
-
-  // TODO: Determine is ack_num always 1?
-  var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
+function send_and_recieve(packet, data_args) {
+  // Concatenate the arguments
+  var chat_data_string = data_args.join("|");
   chatDataPacket.updateProp("data", chat_data_string);
 
+  // Send the packet to the server
   console.log("Client is sending the following DATA packet:");
   console.log(chatDataPacket);
   client.send(chatDataPacket.encode(), send_port, host, (err) => {});
   console.log("DATA Info sent");
+
+  // Recieve data back
+  client.on("message", function (msg, info) {
+    console.log(
+      "Received %d bytes from %s:%d\n",
+      msg.length,
+      info.address,
+      info.port
+    );
+
+    let recieved_data = packet.decode(msg);
+
+    // TODO: Determine if data recieved is valid
+
+    // Update with new things:
+    packet.updateRecieveData(recieved_data);
+
+    // Return the information send
+    return packet.data;
+  });
 }
 
 // Print text into the user bubble
@@ -321,15 +334,12 @@ class TCPPacket {
   }
 
   decode(data) {
-    // TODO: Fix decode now for the data
     let unpacked = struct.unpack(
       packetType,
       Buffer.from(data.slice(0, -DATA_LEN), "hex")
     );
     let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
     unpacked.push(recieved_data);
-    console.log("DECODED IS");
-    console.log(unpacked);
     return unpacked;
   }
 
