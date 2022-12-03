@@ -5,7 +5,7 @@ const struct = require("python-struct");
 const internal = require("stream");
 
 // Constant variables
-const packetType = "!HHIIBBHHHI300p";
+const packetType = "!HHIIBBHHHI";
 const packetIndices = {
   sourcePort: 0,
   destPort: 1,
@@ -27,6 +27,7 @@ const VOTES = "votes";
 const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
+const DATA_LEN = 1000;
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
@@ -296,25 +297,30 @@ class TCPPacket {
       this.syn.toString() +
       this.fin.toString();
 
-    var flagDecimal = parseInt(flags, 2);
-    var uint8array = new TextEncoder("utf-8").encode(this.data);
+    let flagDecimal = parseInt(flags, 2);
+
+    let encoded_data = window.btoa(
+      "Banana" + " ".repeat(DATA_LEN - this.data.length)
+    );
+
+    // var uint8array = new TextEncoder("utf-8").encode(this.data);
     // var string = new TextDecoder().decode(uint8array);
     // console.log(uint8array, string);
 
-    return struct.pack(
-      packetType,
-      this.src_port,
-      this.dst_port,
-      this.seq_num,
-      this.ack_num,
-      0,
-      flagDecimal,
-      0,
-      0,
-      0,
-      this.options,
-      300,
-      this.data
+    return (
+      struct.pack(
+        packetType,
+        this.src_port,
+        this.dst_port,
+        this.seq_num,
+        this.ack_num,
+        0,
+        flagDecimal,
+        0,
+        0,
+        0,
+        this.options
+      ) + encoded_data
     );
   }
 
