@@ -31,37 +31,38 @@ const COMMITTEES = "committees";
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
 const TOPICS = {
-    [BILLS]: [
-        ["introduced", "Date bill was introduced in the format yyyy-mm-dd"],
-        ["legisinfo_id", "ID assigned by parl.gc.ca's LEGISinfo"],
-        ["private_member_bill", "Is it a private member's bill? True or False"],
-        ["law", "Did it become law? True or False"],
-        ["number", "ex. C-10"],
-        ["session", "Session number, ex. 41-1"]
+  [BILLS]: [
+    ["introduced", "Date bill was introduced in the format yyyy-mm-dd"],
+    ["legisinfo_id", "ID assigned by parl.gc.ca's LEGISinfo"],
+    ["private_member_bill", "Is it a private member's bill? True or False"],
+    ["law", "Did it become law? True or False"],
+    ["number", "ex. C-10"],
+    ["session", "Session number, ex. 41-1"],
+  ],
+  [VOTES]: [
+    ["bill", "ex. /bills/41-1/C-10/"],
+    ["nay_total", "votes against"],
+    ["yea_total", "votes for"],
+    ["session", "ex. 41-1"],
+    ["date", "ex. 2011-01-01"],
+    ["number", "every vote in a session has a sequential number"],
+    ["result", "Passed, Failed, Tie"],
+  ],
+  [POLITICIANS]: [
+    ["family_name", "ex. Harper"],
+    ["given_name", "ex. Stephen"],
+    [
+      "include",
+      "'former' to show former MPs (since 94), 'all' for current and former",
     ],
-    [VOTES]: [
-        ["bill", "ex. /bills/41-1/C-10/"],
-        ["nay_total", "votes against"],
-        ["yea_total", "votes for"],
-        ["session", "ex. 41-1"],
-        ["date", "ex. 2011-01-01"],
-        ["number", "every vote in a session has a sequential number"],
-        ["result", "Passed, Failed, Tie"]
-    ],
-    [POLITICIANS]: [
-        ["family_name", "ex. Harper"],
-        ["given_name", "ex. Stephen"],
-        ["include", "'former' to show former MPs (since 94), 'all' for current and former"],
-        ["name", "ex. Stephen Harper"]
-    ],
-    [DEBATES]: [
-        ["date", "ex. 2010-01-01"],
-        ["number","Each Hansard in a session is given a sequential #"],
-        ["session", "ex. 41-1"]
-    ],
-    [COMMITTEES]: [
-        ["session", "??"]
-    ]
+    ["name", "ex. Stephen Harper"],
+  ],
+  [DEBATES]: [
+    ["date", "ex. 2010-01-01"],
+    ["number", "Each Hansard in a session is given a sequential #"],
+    ["session", "ex. 41-1"],
+  ],
+  [COMMITTEES]: [["session", "??"]],
 };
 
 // Connection settings
@@ -107,14 +108,14 @@ window.startConnection = function () {
 };
 
 function scroll_to_bottom() {
-  var elem = document.getElementById('chat');
+  var elem = document.getElementById("chat");
   elem.scrollTop = elem.scrollHeight;
 }
 
 var chat_input = new Array();
 var topic = "";
-const valid_number_warning = 'Please enter a valid number!';
-const filter_value = 'What value are you filtering for?';
+const valid_number_warning = "Please enter a valid number!";
+const filter_value = "What value are you filtering for?";
 
 function parse() {
   let text = document.getElementById("input").value;
@@ -128,7 +129,7 @@ function parse() {
   if (input_length == 0) {
     // check if the input is a valid number
     if (isNaN(text) || text.length == 0) {
-      print_as_bot(valid_number_warning); 
+      print_as_bot(valid_number_warning);
       return;
     }
 
@@ -152,13 +153,13 @@ function parse() {
 
   // check if input is for the second question in the flow (filters)
   // the topic has been selected
-  if (input_length >= 1) { 
+  if (input_length >= 1) {
     // odd means we have 1 topic and pairs of filters + value
     if (input_length % 2 == 1) {
       // they are selecting a filter option
       // check if the input is a valid number
       if (isNaN(text) || text.length == 0) {
-        print_as_bot(valid_number_warning); 
+        print_as_bot(valid_number_warning);
         return;
       }
 
@@ -169,7 +170,7 @@ function parse() {
         return;
       } else if (input_num == 0) {
         // TODO: no filter is applied, skip straight to sending the packet over
-        
+
         // reset the list since api has been called
         chat_input = new Array();
         return;
@@ -179,7 +180,6 @@ function parse() {
         console.log(chat_input);
         print_as_bot(filter_value);
       }
-
     } else {
       // they are giving a filter value
       // any text works so just store that
@@ -190,7 +190,6 @@ function parse() {
       print_selection_menu(TOPICS[topic]);
     }
   }
-
 
   // Send this data to the server
   // TODO: Fix with the real array afterwards
@@ -216,13 +215,15 @@ function parse() {
 
 // Print text into the user bubble
 function print_as_user(text) {
-  document.getElementById("chat").innerHTML += '<div class="chat user-chat"><p>' + text + '</p></div>';
+  document.getElementById("chat").innerHTML +=
+    '<div class="chat user-chat"><p>' + text + "</p></div>";
   scroll_to_bottom();
 }
 
 // Print text into a chat bot bubble
 function print_as_bot(text) {
-  document.getElementById("chat").innerHTML += '<div class="chat bot-chat"><p>' + text + '</p></div>';
+  document.getElementById("chat").innerHTML +=
+    '<div class="chat bot-chat"><p>' + text + "</p></div>";
   scroll_to_bottom();
 }
 
@@ -231,7 +232,13 @@ function print_selection_menu(sub_topics) {
   let text = "Select a filter you would like to add: <br>";
   text += "0. No filters <br>";
   for (let i = 0; i < sub_topics.length; i++) {
-    text += (i+1).toString() + ". <b>" + sub_topics[i][0] + "</b>: " + sub_topics[i][1] + "<br>";
+    text +=
+      (i + 1).toString() +
+      ". <b>" +
+      sub_topics[i][0] +
+      "</b>: " +
+      sub_topics[i][1] +
+      "<br>";
   }
   print_as_bot(text);
 }
@@ -256,7 +263,7 @@ class TCPPacket {
     checksum = 0,
     urgent = 0,
     options = 0,
-    data = 0
+    data = ""
   ) {
     this.src_port = src_port;
     this.dst_port = dst_port;
@@ -290,9 +297,12 @@ class TCPPacket {
       this.fin.toString();
 
     var flagDecimal = parseInt(flags, 2);
+    var uint8array = new TextEncoder("utf-8").encode(this.data);
+    // var string = new TextDecoder().decode(uint8array);
+    // console.log(uint8array, string);
 
     return struct.pack(
-      "!HHIIBBHHHII",
+      packetType,
       this.src_port,
       this.dst_port,
       this.seq_num,
@@ -303,7 +313,7 @@ class TCPPacket {
       0,
       0,
       this.options,
-      this.data
+      struct.pack("I", 300) + uint8array
     );
   }
 
