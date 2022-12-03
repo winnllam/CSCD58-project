@@ -112,7 +112,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             connections.remove(addr)
         # Case 5: Connection is already established
         elif (addr in connections):
-            print("Data received, byte format:")
+            print("Data received:")
             print(pkt.data)
             # TODO: With pkt.data, parse it, and call necessary api to get information.
             response_data = "response string- to be changed"
