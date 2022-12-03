@@ -5,7 +5,7 @@ const struct = require("python-struct");
 const internal = require("stream");
 
 // Constant variables
-const packetType = "!HHIIBBHHHI300p";
+const packetType = "!HHIIBBHHHI";
 const packetIndices = {
   sourcePort: 0,
   destPort: 1,
@@ -27,41 +27,43 @@ const VOTES = "votes";
 const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
+const DATA_LEN = 1000;
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
 const TOPICS = {
-    [BILLS]: [
-        ["introduced", "Date bill was introduced in the format yyyy-mm-dd"],
-        ["legisinfo_id", "ID assigned by parl.gc.ca's LEGISinfo"],
-        ["private_member_bill", "Is it a private member's bill? True or False"],
-        ["law", "Did it become law? True or False"],
-        ["number", "ex. C-10"],
-        ["session", "Session number, ex. 41-1"]
+  [BILLS]: [
+    ["introduced", "Date bill was introduced in the format yyyy-mm-dd"],
+    ["legisinfo_id", "ID assigned by parl.gc.ca's LEGISinfo"],
+    ["private_member_bill", "Is it a private member's bill? True or False"],
+    ["law", "Did it become law? True or False"],
+    ["number", "ex. C-10"],
+    ["session", "Session number, ex. 41-1"],
+  ],
+  [VOTES]: [
+    ["bill", "ex. /bills/41-1/C-10/"],
+    ["nay_total", "votes against"],
+    ["yea_total", "votes for"],
+    ["session", "ex. 41-1"],
+    ["date", "ex. 2011-01-01"],
+    ["number", "every vote in a session has a sequential number"],
+    ["result", "Passed, Failed, Tie"],
+  ],
+  [POLITICIANS]: [
+    ["family_name", "ex. Harper"],
+    ["given_name", "ex. Stephen"],
+    [
+      "include",
+      "'former' to show former MPs (since 94), 'all' for current and former",
     ],
-    [VOTES]: [
-        ["bill", "ex. /bills/41-1/C-10/"],
-        ["nay_total", "votes against"],
-        ["yea_total", "votes for"],
-        ["session", "ex. 41-1"],
-        ["date", "ex. 2011-01-01"],
-        ["number", "every vote in a session has a sequential number"],
-        ["result", "Passed, Failed, Tie"]
-    ],
-    [POLITICIANS]: [
-        ["family_name", "ex. Harper"],
-        ["given_name", "ex. Stephen"],
-        ["include", "'former' to show former MPs (since 94), 'all' for current and former"],
-        ["name", "ex. Stephen Harper"]
-    ],
-    [DEBATES]: [
-        ["date", "ex. 2010-01-01"],
-        ["number","Each Hansard in a session is given a sequential #"],
-        ["session", "ex. 41-1"]
-    ],
-    [COMMITTEES]: [
-        ["session", "??"]
-    ]
+    ["name", "ex. Stephen Harper"],
+  ],
+  [DEBATES]: [
+    ["date", "ex. 2010-01-01"],
+    ["number", "Each Hansard in a session is given a sequential #"],
+    ["session", "ex. 41-1"],
+  ],
+  [COMMITTEES]: [["session", "??"]],
 };
 
 // Connection settings
@@ -70,14 +72,13 @@ const send_port = 65432;
 const listen_port = 65433;
 const num_options = 8;
 var client = dgram.createSocket("udp4");
+client.bind(listen_port, host);
 
 window.startConnection = function () {
-  client.bind(listen_port, host);
-
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
-  console.log(pkt);
+  console.log(pkt.encode());
   client.send(pkt.encode(), send_port, host, (err) => {});
   console.log("Info sent");
 
@@ -107,7 +108,7 @@ window.startConnection = function () {
 };
 
 function scroll_to_bottom() {
-  var elem = document.getElementById('chat');
+  var elem = document.getElementById("chat");
   elem.scrollTop = elem.scrollHeight;
 }
 
@@ -118,6 +119,9 @@ const valid_number_warning = 'Please enter a valid number!';
 const filter_value = 'What value are you filtering for?';
 
 function parse() {
+  // TODO: Determine is ack_num always 1?
+  var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
+
   let text = document.getElementById("input").value;
   if (text != "") {
     print_as_user(text);
@@ -131,7 +135,7 @@ function parse() {
     if (input_length == 0) {
       // check if the input is a valid number
       if (isNaN(text) || text.length == 0) {
-        print_as_bot(valid_number_warning); 
+        print_as_bot(valid_number_warning);
         return;
       }
 
@@ -225,39 +229,51 @@ function parse() {
 
     chat_input = new Array();
   }
+}
 
-
-  // Send this data to the server
-  // TODO: Fix with the real array afterwards
-  var chat_input_dummy = new Array();
-  for (let i = 0; i < 1 + num_options; i++) {
-    if (i == 0) {
-      chat_input_dummy.push("0");
-    } else {
-      chat_input_dummy.push("");
-    }
-  }
-  var chat_data_string = chat_input_dummy.join("|");
-
-  // TODO: Determine is ack_num always 1?
-  var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
+function send_and_recieve(packet, data_args) {
+  // Concatenate the arguments
+  var chat_data_string = data_args.join("|");
   chatDataPacket.updateProp("data", chat_data_string);
 
+  // Send the packet to the server
   console.log("Client is sending the following DATA packet:");
   console.log(chatDataPacket);
   client.send(chatDataPacket.encode(), send_port, host, (err) => {});
   console.log("DATA Info sent");
+
+  // Recieve data back
+  client.on("message", function (msg, info) {
+    console.log(
+      "Received %d bytes from %s:%d\n",
+      msg.length,
+      info.address,
+      info.port
+    );
+
+    let recieved_data = packet.decode(msg);
+
+    // TODO: Determine if data recieved is valid
+
+    // Update with new things:
+    packet.updateRecieveData(recieved_data);
+
+    // Return the information send
+    return packet.data;
+  });
 }
 
 // Print text into the user bubble
 function print_as_user(text) {
-  document.getElementById("chat").innerHTML += '<div class="chat user-chat"><p>' + text + '</p></div>';
+  document.getElementById("chat").innerHTML +=
+    '<div class="chat user-chat"><p>' + text + "</p></div>";
   scroll_to_bottom();
 }
 
 // Print text into a chat bot bubble
 function print_as_bot(text) {
-  document.getElementById("chat").innerHTML += '<div class="chat bot-chat"><p>' + text + '</p></div>';
+  document.getElementById("chat").innerHTML +=
+    '<div class="chat bot-chat"><p>' + text + "</p></div>";
   scroll_to_bottom();
 }
 
@@ -266,7 +282,13 @@ function print_selection_menu(sub_topics) {
   let text = "Select a filter you would like to add: <br>";
   text += "0. No filters <br>";
   for (let i = 0; i < sub_topics.length; i++) {
-    text += (i+1).toString() + ". <b>" + sub_topics[i][0] + "</b>: " + sub_topics[i][1] + "<br>";
+    text +=
+      (i + 1).toString() +
+      ". <b>" +
+      sub_topics[i][0] +
+      "</b>: " +
+      sub_topics[i][1] +
+      "<br>";
   }
   print_as_bot(text);
 }
@@ -291,7 +313,7 @@ class TCPPacket {
     checksum = 0,
     urgent = 0,
     options = 0,
-    data = 0
+    data = ""
   ) {
     this.src_port = src_port;
     this.dst_port = dst_port;
@@ -324,10 +346,15 @@ class TCPPacket {
       this.syn.toString() +
       this.fin.toString();
 
-    var flagDecimal = parseInt(flags, 2);
+    let flagDecimal = parseInt(flags, 2);
 
-    return struct.pack(
-      "!HHIIBBHHHII",
+    let encoded_data = Buffer.from(
+      this.data + " ".repeat(DATA_LEN - this.data.length),
+      "utf-8"
+    );
+
+    var encoded = struct.pack(
+      packetType,
       this.src_port,
       this.dst_port,
       this.seq_num,
@@ -337,13 +364,18 @@ class TCPPacket {
       0,
       0,
       0,
-      this.options,
-      this.data
+      this.options
     );
+    return Buffer.concat([encoded, encoded_data]);
   }
 
   decode(data) {
-    var unpacked = struct.unpack(packetType, Buffer.from(data, "hex"));
+    let unpacked = struct.unpack(
+      packetType,
+      Buffer.from(data.slice(0, -DATA_LEN), "hex")
+    );
+    let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
+    unpacked.push(recieved_data);
     return unpacked;
   }
 

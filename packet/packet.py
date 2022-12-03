@@ -1,8 +1,10 @@
 import struct
+PACKET_TYPE = "!HHIIBBHHHI"
+DATA_LEN = 1000
 
 
 class TCPPacket:
-    def __init__(self, src_port, dst_port, seq_num, ack_num, cwr=int(0), ece=int(0), urg=int(0), ack=int(0), psh=int(0), rst=int(0), syn=int(0), fin=int(0), checksum=0, options=0, data=0):
+    def __init__(self, src_port, dst_port, seq_num, ack_num, cwr=int(0), ece=int(0), urg=int(0), ack=int(0), psh=int(0), rst=int(0), syn=int(0), fin=int(0), checksum=0, options=0, data=""):
         self.src_port = src_port
         self.dst_port = dst_port
         self.seq_num = seq_num
@@ -46,4 +48,5 @@ class TCPPacket:
         # Converts the flags directly to a byte string. 0 is no flag, 1 represents flag active
         flags = str(self.cwr) + str(self.ece) + str(self.urg) + str(self.ack) + \
             str(self.psh) + str(self.rst) + str(self.syn) + str(self.fin)
-        return struct.pack("!HHIIBBHHHII", self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options, self.data)
+        encoded_data = str.encode(self.data.ljust(DATA_LEN, ' '))
+        return struct.pack(PACKET_TYPE, self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options) + encoded_data
