@@ -113,6 +113,7 @@ function scroll_to_bottom() {
 
 var chat_input = new Array();
 var topic = "";
+var api_call = 1;
 const valid_number_warning = 'Please enter a valid number!';
 const filter_value = 'What value are you filtering for?';
 
@@ -123,39 +124,11 @@ function parse() {
   }
   let input_length = chat_input.length;
 
-  // check if the input is for the first question in the flow (which topic)
-  // nothing so far has been selected
-  if (input_length == 0) {
-    // check if the input is a valid number
-    if (isNaN(text) || text.length == 0) {
-      print_as_bot(valid_number_warning); 
-      return;
-    }
-
-    // check if the input is a valid number in terms of range
-    let input_num = parseInt(text);
-    if (input_num < 0 || input_num > LIST_OF_TOPICS.length) {
-      print_as_bot(valid_number_warning);
-      return;
-    } else {
-      // save the input selection number
-      chat_input.push(input_num);
-      console.log(chat_input);
-
-      // output the next selection menu
-      topic = LIST_OF_TOPICS[input_num - 1];
-      print_selection_menu(TOPICS[topic]);
-      // leave since we still need the filter input before sending to server
-      return;
-    }
-  }
-
-  // check if input is for the second question in the flow (filters)
-  // the topic has been selected
-  if (input_length >= 1) { 
-    // odd means we have 1 topic and pairs of filters + value
-    if (input_length % 2 == 1) {
-      // they are selecting a filter option
+  // collection for first round of api call
+  if (api_call == 1) {
+    // check if the input is for the first question in the flow (which topic)
+    // nothing so far has been selected
+    if (input_length == 0) {
       // check if the input is a valid number
       if (isNaN(text) || text.length == 0) {
         print_as_bot(valid_number_warning); 
@@ -164,31 +137,93 @@ function parse() {
 
       // check if the input is a valid number in terms of range
       let input_num = parseInt(text);
-      if (input_num < 0 || input_num > TOPICS[topic].length) {
+      if (input_num < 0 || input_num > LIST_OF_TOPICS.length) {
         print_as_bot(valid_number_warning);
-        return;
-      } else if (input_num == 0) {
-        // TODO: no filter is applied, skip straight to sending the packet over
-        
-        // reset the list since api has been called
-        chat_input = new Array();
         return;
       } else {
         // save the input selection number
         chat_input.push(input_num);
         console.log(chat_input);
-        print_as_bot(filter_value);
+
+        // output the next selection menu
+        topic = LIST_OF_TOPICS[input_num - 1];
+        print_selection_menu(TOPICS[topic]);
+        // leave since we still need the filter input before sending to server
+        return;
       }
-
-    } else {
-      // they are giving a filter value
-      // any text works so just store that
-      chat_input.push(text);
-      console.log(chat_input);
-
-      // relaunch the menu for them to see and run it back
-      print_selection_menu(TOPICS[topic]);
     }
+
+    // check if input is for the second question in the flow (filters)
+    // the topic has been selected
+    if (input_length >= 1) { 
+      // odd means we have 1 topic and pairs of filters + value
+      if (input_length % 2 == 1) {
+        // they are selecting a filter option
+        // check if the input is a valid number
+        if (isNaN(text) || text.length == 0) {
+          print_as_bot(valid_number_warning); 
+          return;
+        }
+
+        // check if the input is a valid number in terms of range
+        let input_num = parseInt(text);
+        if (input_num < 0 || input_num > TOPICS[topic].length) {
+          print_as_bot(valid_number_warning);
+          return;
+        } else if (input_num == 0) {
+          // TODO: no filter is applied, skip straight to sending the packet over
+          // TODO: maybe a try catch too?
+          
+          // reset the list since api has been called
+          chat_input = new Array();
+          api_call++;
+          return;
+        } else {
+          // save the input selection number
+          chat_input.push(input_num);
+          console.log(chat_input);
+          print_as_bot(filter_value);
+        }
+
+      } else {
+        // they are giving a filter value
+        // any text works so just store that
+        chat_input.push(text);
+        console.log(chat_input);
+
+        // relaunch the menu for them to see and run it back
+        print_selection_menu(TOPICS[topic]);
+      }
+    }
+  // collection for second round of api call
+  } else if (api_call == 2) {
+    // check if valid input
+    if (isNaN(text) || text.length == 0) {
+      print_as_bot(valid_number_warning); 
+      return;
+    }
+
+    // check if input is within range
+    let input_num = parseInt(text);
+    // TODO: change to actual list length (varies from 6 to 7)
+    if (input_num < 0 || input_num > 6) {
+      print_as_bot(valid_number_warning);
+      return;
+    } else if (input_num == 0) {
+      // TODO: hit the api to get previous list
+      // redisplay the selection list
+    } else if (input_num == 6) {
+      // TODO: hit the api to get next list
+      // redisplay the selection list
+    } else {
+      // TODO: call the api to get back page information
+      // still display selection list incase they want to continue to see more
+
+      // TODO: if they dont, have an exit number to cancel this call and reset
+      api_call = 1;
+    }
+
+    chat_input = new Array();
   }
 
 
