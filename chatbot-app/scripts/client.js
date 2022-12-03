@@ -313,7 +313,8 @@ class TCPPacket {
       0,
       0,
       this.options,
-      struct.pack("I", 300) + uint8array
+      300,
+      this.data
     );
   }
 
