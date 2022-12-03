@@ -79,7 +79,7 @@ window.startConnection = function () {
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
-  console.log(pkt);
+  console.log(pkt.encode());
   client.send(pkt.encode(), send_port, host, (err) => {});
   console.log("Info sent");
 
@@ -299,33 +299,37 @@ class TCPPacket {
 
     let flagDecimal = parseInt(flags, 2);
 
-    let encoded_data = window.btoa(
-      "Banana" + " ".repeat(DATA_LEN - this.data.length)
+    let encoded_data = Buffer.from(
+      this.data + " ".repeat(DATA_LEN - this.data.length),
+      "utf-8"
     );
 
-    // var uint8array = new TextEncoder("utf-8").encode(this.data);
-    // var string = new TextDecoder().decode(uint8array);
-    // console.log(uint8array, string);
-
-    return (
-      struct.pack(
-        packetType,
-        this.src_port,
-        this.dst_port,
-        this.seq_num,
-        this.ack_num,
-        0,
-        flagDecimal,
-        0,
-        0,
-        0,
-        this.options
-      ) + encoded_data
+    var encoded = struct.pack(
+      packetType,
+      this.src_port,
+      this.dst_port,
+      this.seq_num,
+      this.ack_num,
+      0,
+      flagDecimal,
+      0,
+      0,
+      0,
+      this.options
     );
+    return Buffer.concat([encoded, encoded_data]);
   }
 
   decode(data) {
-    var unpacked = struct.unpack(packetType, Buffer.from(data, "hex"));
+    // TODO: Fix decode now for the data
+    let unpacked = struct.unpack(
+      packetType,
+      Buffer.from(data.slice(0, -DATA_LEN), "hex")
+    );
+    let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
+    unpacked.push(recieved_data);
+    console.log("DECODED IS");
+    console.log(unpacked);
     return unpacked;
   }
 
