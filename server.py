@@ -17,7 +17,7 @@ def decode_packet(data):
                                 ack=flag_byte[3], psh=flag_byte[4], rst=flag_byte[5], syn=flag_byte[6], fin=flag_byte[7], checksum=decoded_data[6], options=decoded_data[7], data=data[-DATA_LEN:])
     return received_packet
 
-# Helper fuynction to decode packet from byte form, and return the flag byte string
+# Helper function to decode packet from byte form, and return the flag byte string
 
 
 def decode_packet_flag_byte(data):
@@ -51,6 +51,11 @@ def send_fin(s, client_host, client_port, seq_num):
     print(pkt.encode())
     s.sendto(pkt.encode(), (client_host, client_port))
     return
+
+def send_response(s, client_host, client_port, seq_num, response_data):
+    pkt = TCPPacket(src_port=PORT, dst_port=client_port,
+                    seq_num=seq_num, data=response_data)
+    s.sendto(pkt.encode(), (client_host, client_port))
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -107,8 +112,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             connections.remove(addr)
         # Case 5: Connection is already established
         elif (addr in connections):
-            print("todo")
-            # TODO: do something with the data
-            # Process the request, send stuff back.
-
-        # TODO: closing connection
+            print("Data received, byte format:")
+            print(pkt.data)
+            # TODO: With pkt.data, parse it, and call necessary api to get information.
+            response_data = "response string- to be changed"
+            # Send packet back to client with necessary info
+            send_response(s, addr[0], addr[1], pkt.seq_num+1, response_data)
