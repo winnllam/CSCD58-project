@@ -125,6 +125,7 @@ function parse() {
   let text = document.getElementById("input").value;
   if (text != "") {
     print_as_user(text);
+    document.getElementById("input").value = '';
   }
   let input_length = chat_input.length;
 
@@ -177,10 +178,10 @@ function parse() {
         } else if (input_num == 0) {
           // TODO: no filter is applied, skip straight to sending the packet over
           // TODO: maybe a try catch too?
-          
+          send_and_recieve(chatDataPacket, chat_input);
           // reset the list since api has been called
           chat_input = new Array();
-          api_call++;
+          api_call = 2;
           return;
         } else {
           // save the input selection number
@@ -234,12 +235,12 @@ function parse() {
 function send_and_recieve(packet, data_args) {
   // Concatenate the arguments
   var chat_data_string = data_args.join("|");
-  chatDataPacket.updateProp("data", chat_data_string);
+  packet.updateProp("data", chat_data_string);
 
   // Send the packet to the server
   console.log("Client is sending the following DATA packet:");
-  console.log(chatDataPacket);
-  client.send(chatDataPacket.encode(), send_port, host, (err) => {});
+  console.log(packet);
+  client.send(packet.encode(), send_port, host, (err) => {});
   console.log("DATA Info sent");
 
   // Recieve data back
