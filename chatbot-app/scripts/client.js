@@ -71,10 +71,9 @@ const send_port = 65432;
 const listen_port = 65433;
 const num_options = 8;
 var client = dgram.createSocket("udp4");
+client.bind(listen_port, host);
 
 window.startConnection = function () {
-  client.bind(listen_port, host);
-
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
@@ -206,11 +205,38 @@ function parse() {
   // TODO: Determine is ack_num always 1?
   var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
   chatDataPacket.updateProp("data", chat_data_string);
+}
 
+function send_and_recieve(packet, data_args) {
+  // Concatenate the arguments
+  var chat_data_string = data_args.join("|");
+  chatDataPacket.updateProp("data", chat_data_string);
+
+  // Send the packet to the server
   console.log("Client is sending the following DATA packet:");
   console.log(chatDataPacket);
   client.send(chatDataPacket.encode(), send_port, host, (err) => {});
   console.log("DATA Info sent");
+
+  // Recieve data back
+  client.on("message", function (msg, info) {
+    console.log(
+      "Received %d bytes from %s:%d\n",
+      msg.length,
+      info.address,
+      info.port
+    );
+
+    let recieved_data = packet.decode(msg);
+
+    // TODO: Determine if data recieved is valid
+
+    // Update with new things:
+    packet.updateRecieveData(data);
+
+    // Return the information send
+    return packet.data;
+  });
 }
 
 // Print text into the user bubble
@@ -297,7 +323,7 @@ class TCPPacket {
       this.fin.toString();
 
     var flagDecimal = parseInt(flags, 2);
-    var uint8array = new TextEncoder("utf-8").encode(this.data);
+    // var uint8array = new TextEncoder("utf-8").encode(this.data);
     // var string = new TextDecoder().decode(uint8array);
     // console.log(uint8array, string);
 
@@ -336,6 +362,8 @@ class TCPPacket {
     this.checksum = data[packetIndices.checksum];
     this.urgent = data[packetIndices.urgent];
     this.options = data[packetIndices.options];
+
+    // TODO: Might have to fix since we now have strings
     this.data = data[packetIndices.data];
   }
 
