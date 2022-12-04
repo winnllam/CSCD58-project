@@ -1,5 +1,6 @@
 // Import Statements
 var dgram = require("dgram");
+var aesjs = require('aes-js');
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const internal = require("stream");
@@ -28,6 +29,8 @@ const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
 const DATA_LEN = 1000;
+const CTR_NONCE = Buffer.from('HwxhkJKr');
+const KEY = Buffer.from('kHEmduHeKCCtsuWu');
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
@@ -333,7 +336,10 @@ class TCPPacket {
       0,
       this.options
     );
-    return Buffer.concat([encoded, encoded_data]);
+    var unencrypted_decoded_data =  Buffer.concat([encoded, encoded_data]);
+
+    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    return cipher.encrypt(unencrypted_decoded_data);
   }
 
   decode(data) {
@@ -343,7 +349,9 @@ class TCPPacket {
     );
     let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
     unpacked.push(recieved_data);
-    return unpacked;
+
+    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    return cipher.encrypt(unpacked);
   }
 
   updateProp(prop, newValue) {
