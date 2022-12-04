@@ -67,6 +67,18 @@ const TOPICS = {
   [COMMITTEES]: [["session", "??"]],
 };
 
+const TOPIC_MENU = '<div class="chat bot-chat">' +
+  '<p>Here are the available topics to search about:</p>' +
+  '</div>' +
+  '<div class="chat bot-chat">' +
+  '<p>0. Exit</p>' +
+  '<p>1. Bills</p>' +
+  '<p>2. Votes</p>' +
+  '<p>3. Politicians</p>' +
+  '<p>4. Debates</p>' +
+  '<p>5. Committees</p>' +
+  '</div>';
+
 // Connection settings
 const host = "127.0.0.1";
 const send_port = 65432;
@@ -116,7 +128,6 @@ function scroll_to_bottom() {
 var chat_input = new Array();
 var topic = "";
 var api_call = 1;
-var data_list = new Array();
 const valid_number_warning = 'Please enter a valid number!';
 const filter_value = 'What value are you filtering for?';
 
@@ -130,6 +141,7 @@ function parse() {
     document.getElementById("input").value = '';
   }
   let input_length = chat_input.length;
+  console.log(input_length);
 
   // collection for first round of api call
   if (api_call == 1) {
@@ -178,18 +190,17 @@ function parse() {
           print_as_bot(valid_number_warning);
           return;
         } else if (input_num == 0) {
-          // TODO: no filter is applied, skip straight to sending the packet over
-          // TODO: maybe a try catch too?
           chat_input.push(input_num);
-          send_and_recieve(chatDataPacket, chat_input);
+          const res = send_and_recieve(chatDataPacket, chat_input);
+          console.log(res);
           return;
         } else {
           // save the input selection number
           chat_input.push(input_num);
           console.log(chat_input);
           print_as_bot(filter_value);
+          return;
         }
-
       } else {
         // they are giving a filter value
         // any text works so just store that
@@ -202,6 +213,7 @@ function parse() {
 
         // relaunch the menu for them to see and run it back
         print_selection_menu(TOPICS[topic]);
+        return;
       }
     }
   // collection for second round of api call
@@ -228,15 +240,11 @@ function parse() {
       // redisplay the selection list
     } else {
       // TODO: call the api to get back page information
-      console.log(input_num);
       send_and_recieve(chatDataPacket, [input_num]);
       // still display selection list incase they want to continue to see more
       return;
       // TODO: if they dont, have an exit number to cancel this call and reset
-
     }
-
-    chat_input = new Array();
   }
 }
 
@@ -271,6 +279,7 @@ function send_and_recieve(packet, data_args) {
     packet_data = packet.data.toString();
 
     if (api_call == 1) {
+      console.log("first api call");
       // clean up the data into a list
       space_index = packet_data.lastIndexOf(DELIMITER);
       data = packet_data.slice(0, space_index);
@@ -280,8 +289,13 @@ function send_and_recieve(packet, data_args) {
       print_as_bot(data_list.join(""));
       api_call = 2;
     } else if (api_call == 2) {
+      console.log("second api call")
+      print_as_bot(packet_data);
       api_call = 1;
+
+      print_as_bot(TOPIC_MENU);
     }
+    console.log(api_call);
 
     // reset the list since api has been called
     chat_input = new Array();

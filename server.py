@@ -88,8 +88,6 @@ def call_api(packet_data):
                 # in pairs of filter name, value
                 filter_details = TOPICS[topic][name_index]
                 filters[filter_details[0]] = value
-            
-            print(filters)
 
         api = OpenParlimentApi(topic, filters)
         res = list(api.get_data().values())
@@ -173,8 +171,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         elif (addr in connections):
             print("Data received:")
             print(pkt.data)
-            # TODO: With pkt.data, parse it, and call necessary api to get information.
             response_data = call_api(str(pkt.data))
-            # response_data = "response string- to be changed"
             # Send packet back to client with necessary info
             send_response(s, addr[0], addr[1], pkt.seq_num+1, response_data)
