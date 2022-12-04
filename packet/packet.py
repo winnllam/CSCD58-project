@@ -1,7 +1,7 @@
 import struct
 from Crypto.Cipher import AES
 PACKET_TYPE = "!HHIIBBHHHI"
-DATA_LEN = 1000
+DATA_LEN = 1012
 CBC_IV = b'bKWDch24NmLyLLAx'
 KEY = b'kHEmduHeKCCtsuWu'
 

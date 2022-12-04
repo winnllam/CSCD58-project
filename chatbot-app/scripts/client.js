@@ -28,7 +28,7 @@ const VOTES = "votes";
 const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
-const DATA_LEN = 1000;
+const DATA_LEN = 1012;
 const CBC_IV = Buffer.from('bKWDch24NmLyLLAx');
 const CTR_NONCE = Buffer.from('HwxhkJKr');
 const KEY = Buffer.from('kHEmduHeKCCtsuWu');
@@ -320,9 +320,11 @@ class TCPPacket {
     let flagDecimal = parseInt(flags, 2);
 
     let encoded_data = Buffer.from(
-      this.data + " ".repeat(DATA_LEN - this.data.length),
+      "HIII" + " ".repeat(DATA_LEN - this.data.length),
       "utf-8"
     );
+
+    console.log(encoded_data);
 
     var encoded = struct.pack(
       packetType,
@@ -337,8 +339,10 @@ class TCPPacket {
       0,
       this.options
     );
+    console.log(encoded);
     var unencrypted_decoded_data =  Buffer.concat([encoded, encoded_data]);
-
+    console.log(unencrypted_decoded_data);
+    console.log((unencrypted_decoded_data).length);
     var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
     return cipher.encrypt(unencrypted_decoded_data);
   }

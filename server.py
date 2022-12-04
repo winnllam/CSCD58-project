@@ -6,7 +6,7 @@ import struct
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 PACKET_TYPE = "!HHIIBBHHHI"
-DATA_LEN = 1000
+DATA_LEN = 1012
 CBC_IV = b'bKWDch24NmLyLLAx'
 KEY = b'kHEmduHeKCCtsuWu'
 # Helper function to decode packet from byte to TCPPacket structure
