@@ -190,8 +190,7 @@ function parse() {
           return;
         } else if (input_num == 0) {
           chat_input.push(input_num);
-          const res = send_and_recieve(chatDataPacket, chat_input);
-          console.log(res);
+          send_and_recieve(chatDataPacket, chat_input);
           return;
         } else {
           // save the input selection number
@@ -274,8 +273,15 @@ function send_and_recieve(packet, data_args) {
 
     // Update with new things:
     packet.updateRecieveData(recieved_data);
+    console.log(packet.data);
   });
 
+  setTimeout(() =>
+    parse_packet(packet)
+  , 5000);
+}
+
+function parse_packet(packet) {
   console.log("RECEIVED DATA");
   console.log(packet.data);
   packet_data = packet.data.toString();
@@ -304,11 +310,6 @@ function send_and_recieve(packet, data_args) {
 
   // reset the list since api has been called
   chat_input = new Array();
-
-  // Return the information send
-  // return packet.data;
-
-  return "dying";
 }
 
 // Print text into the user bubble
