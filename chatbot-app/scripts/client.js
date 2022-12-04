@@ -265,8 +265,6 @@ function send_and_recieve(packet, data_args) {
 
     let recieved_data = packet.decode(msg);
 
-    // TODO: Determine if data recieved is valid
-
     // Update with new things:
     packet.updateRecieveData(recieved_data);
     console.log(packet.data);
