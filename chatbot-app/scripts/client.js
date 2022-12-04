@@ -72,8 +72,8 @@ const TOPICS = {
 // Connection settings
 const host = "127.0.0.1";
 // Can set dynamic port when running file: set PORT=65432&&npm start
-const send_port = process.env.PORT
-const listen_port = 65433;
+const send_port = 65432;
+const listen_port = process.env.PORT;
 const num_options = 8;
 var client = dgram.createSocket("udp4");
 client.bind(listen_port, host);
