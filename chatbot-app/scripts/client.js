@@ -1,5 +1,6 @@
 // Import Statements
 var dgram = require("dgram");
+var aesjs = require("aes-js");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const internal = require("stream");
@@ -29,6 +30,8 @@ const DEBATES = "debates";
 const COMMITTEES = "committees";
 const DATA_LEN = 1000;
 const DELIMITER = "|";
+const CTR_NONCE = Buffer.from("HwxhkJKr");
+const KEY = Buffer.from("kHEmduHeKCCtsuWu");
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
@@ -79,13 +82,16 @@ const TOPIC_MENU =
 
 // Connection settings
 const host = "127.0.0.1";
-const send_port = 65432;
+// Can set dynamic port when running file: set PORT=65432&&npm start
+const send_port = process.env.PORT;
 const listen_port = 65433;
 const num_options = 8;
 var client = dgram.createSocket("udp4");
 client.bind(listen_port, host);
 
 window.startConnection = function () {
+  console.log("Client Send Port:");
+  console.log(send_port);
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
@@ -417,7 +423,10 @@ class TCPPacket {
       0,
       this.options
     );
-    return Buffer.concat([encoded, encoded_data]);
+    var unencrypted_decoded_data = Buffer.concat([encoded, encoded_data]);
+
+    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    return cipher.encrypt(unencrypted_decoded_data);
   }
 
   decode(data) {
@@ -427,7 +436,9 @@ class TCPPacket {
     );
     let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
     unpacked.push(recieved_data);
-    return unpacked;
+
+    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    return cipher.encrypt(unpacked);
   }
 
   updateProp(prop, newValue) {

@@ -1,5 +1,6 @@
 import socket
 from packet.packet import TCPPacket
+from Crypto.Cipher import AES
 from api.api import OpenParlimentApi, LIST_OF_TOPICS, URL, TOPICS
 import struct
 
@@ -7,7 +8,8 @@ HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 PACKET_TYPE = "!HHIIBBHHHI"
 DATA_LEN = 1000
-DELIMITER = "|"
+CTR_NONCE = b'HwxhkJKr'
+KEY = b'kHEmduHeKCCtsuWu'DELIMITER = "|"
 
 d = []
 api = OpenParlimentApi("", {})
@@ -56,6 +58,7 @@ def send_fin(s, client_host, client_port, seq_num):
     print(pkt.encode())
     s.sendto(pkt.encode(), (client_host, client_port))
     return
+
 
 def send_response(s, client_host, client_port, seq_num, response_data):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
@@ -125,9 +128,10 @@ def call_api(packet_data):
                 if URL not in key:
                     result += key + DELIMITER + str(res[key]) + DELIMITER
 
-    if result == "" :
+    if result == "":
         return "No results found." + DELIMITER
     return result
+
 
 def create_list(res):
     global d
@@ -136,14 +140,14 @@ def create_list(res):
 
     if (api.prev_url != None):
         result += "0: Previous 5 <br>" + DELIMITER
-    
+
     for i in range(len(res)):
         result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
         d.append(res[i][URL])
 
     if (api.next_url != None):
         result += "6. Next 5 <br>" + DELIMITER
-    
+
     return result
 
 
@@ -169,8 +173,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 
         # Receive packet data and process it
         data, addr = s.recvfrom(1024)
-        pkt = decode_packet(data)
-        pkt_flag = decode_packet_flag_byte(data)
+        cipher = AES.new(KEY, AES.MODE_CTR, nonce=CTR_NONCE)
+        decoded_data = cipher.decrypt(data)
+        pkt = decode_packet(decoded_data)
+        pkt_flag = decode_packet_flag_byte(decoded_data)
 
         # Case 1: SYN request
         if (pkt_flag == "00000010"):
