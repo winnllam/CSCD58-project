@@ -11,6 +11,7 @@ PORT = 65432  # The port used by the server
 # TODO: Send SYN to server to initiate TCP connection with the server
 def send_syn():
     pkt = TCPPacket(src_port = 1234, dst_port = PORT, seq_num = 1, ack_num = 1, syn=1)
+    print(len(pkt.encode()))
     s.sendto(pkt.encode(), (HOST, PORT))
     # pkt = TCPPacket(src_port = 1234, dst_port = PORT, seq_num = 1, ack_num = 1)
     # print(pkt.encode())

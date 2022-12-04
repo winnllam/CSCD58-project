@@ -81,12 +81,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         # Receive ACK of FIN
 
         # Receive packet data and process it
+        print("im ready to listen")
         data, addr = s.recvfrom(1024)
         cipher = AES.new(KEY, AES.MODE_CTR, nonce=CTR_NONCE)
         decoded_data = cipher.decrypt(data)
         pkt = decode_packet(decoded_data)
         pkt_flag = decode_packet_flag_byte(decoded_data)
-
+        print(pkt_flag)
         # Case 1: SYN request
         if (pkt_flag == "00000010"):
             # Syn request received, so send SYN-ACK

@@ -1,5 +1,6 @@
 // Import Statements
 var dgram = require("dgram");
+var CryptoJS = require("crypto-js");
 var aesjs = require('aes-js');
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
@@ -233,6 +234,21 @@ function send_and_recieve(packet, data_args) {
   });
 }
 
+function hexToBytes(hex) {
+  for (var bytes = [], c = 0; c < hex.length; c += 2)
+    bytes.push(parseInt(hex.substr(c, 2), 16));
+  return bytes;
+}
+
+function bytesToHex(bytes) {
+  for (var hex = [], i = 0; i < bytes.length; i++) {
+    var current = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
+    hex.push((current >>> 4).toString(16));
+    hex.push((current & 0xF).toString(16));
+  }
+  return hex.join("");
+}
+
 // Print text into the user bubble
 function print_as_user(text) {
   document.getElementById("chat").innerHTML +=
@@ -338,8 +354,19 @@ class TCPPacket {
     );
     var unencrypted_decoded_data =  Buffer.concat([encoded, encoded_data]);
 
-    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
-    return cipher.encrypt(unencrypted_decoded_data);
+    // var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    // return cipher.encrypt(unencrypted_decoded_data);
+
+    console.log("hi");
+    console.log(unencrypted_decoded_data);
+    // console.log(CryptoJS.AES.encrypt(unencrypted_decoded_data, KEY, { iv: CTR_NONCE, mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding }).toString());
+    var encryptedCipher = CryptoJS.AES.encrypt(unencrypted_decoded_data, KEY, { iv: CTR_NONCE, mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+    console.log(hexToBytes(CryptoJS.enc.Hex.stringify(encryptedCipher.ciphertext)));
+    return hexToBytes(CryptoJS.enc.Hex.stringify(encryptedCipher.ciphertext));
+    // var cipher = CryptoJS.algo.AES.createEncryptor(unencrypted_decoded_data, KEY, { mode: CryptoJS.mode.CTR, iv: CTR_NONCE, padding: CryptoJS.pad.NoPadding });
+    // console.log(cipher.process(unencrypted_decoded_data));
+    // console.log("returnign");
+    // return cipher.process(unencrypted_decoded_data);
   }
 
   decode(data) {
@@ -350,8 +377,10 @@ class TCPPacket {
     let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
     unpacked.push(recieved_data);
 
-    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
-    return cipher.encrypt(unpacked);
+    // var cipher = new aesjs.ModeOfOperation.ctr(KEY, nonce);
+    // return cipher.encrypt(unpacked);
+    var decryptedCipher =  CryptoJS.AES.decrypt(unpacked, KEY, { iv: CTR_NONCE, mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+    return bytesToHex(CryptoJS.enc.Hex.stringify(decryptedCipher.ciphertext));
   }
 
   updateProp(prop, newValue) {
