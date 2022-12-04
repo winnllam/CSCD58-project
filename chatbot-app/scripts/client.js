@@ -67,14 +67,15 @@ const TOPICS = {
   [COMMITTEES]: [["session", "??"]],
 };
 
-const TOPIC_MENU_INTRO = '<p>Here are the available topics to search about:</p>';
-const TOPIC_MENU = 
-  '<p>0. Exit</p>' +
-  '<p>1. Bills</p>' +
-  '<p>2. Votes</p>' +
-  '<p>3. Politicians</p>' +
-  '<p>4. Debates</p>' +
-  '<p>5. Committees</p>';
+const TOPIC_MENU_INTRO =
+  "<p>Here are the available topics to search about:</p>";
+const TOPIC_MENU =
+  "<p>0. Exit</p>" +
+  "<p>1. Bills</p>" +
+  "<p>2. Votes</p>" +
+  "<p>3. Politicians</p>" +
+  "<p>4. Debates</p>" +
+  "<p>5. Committees</p>";
 
 // Connection settings
 const host = "127.0.0.1";
@@ -126,8 +127,8 @@ var chat_input = new Array();
 var topic = "";
 var api_call = 1;
 var data_list = new Array();
-const valid_number_warning = 'Please enter a valid number!';
-const filter_value = 'What value are you filtering for?';
+const valid_number_warning = "Please enter a valid number!";
+const filter_value = "What value are you filtering for?";
 
 function parse() {
   // TODO: Determine is ack_num always 1?
@@ -136,7 +137,7 @@ function parse() {
   let text = document.getElementById("input").value;
   if (text != "") {
     print_as_user(text);
-    document.getElementById("input").value = '';
+    document.getElementById("input").value = "";
   }
   let input_length = chat_input.length;
   console.log(input_length);
@@ -172,13 +173,13 @@ function parse() {
 
     // check if input is for the second question in the flow (filters)
     // the topic has been selected
-    if (input_length >= 1) { 
+    if (input_length >= 1) {
       // odd means we have 1 topic and pairs of filters + value
       if (input_length % 2 == 1) {
         // they are selecting a filter option
         // check if the input is a valid number
         if (isNaN(text) || text.length == 0) {
-          print_as_bot(valid_number_warning); 
+          print_as_bot(valid_number_warning);
           return;
         }
 
@@ -214,11 +215,11 @@ function parse() {
         return;
       }
     }
-  // collection for second round of api call
+    // collection for second round of api call
   } else if (api_call == 2) {
     // check if valid input
     if (isNaN(text) || text.length == 0) {
-      print_as_bot(valid_number_warning); 
+      print_as_bot(valid_number_warning);
       return;
     }
 
@@ -273,38 +274,39 @@ function send_and_recieve(packet, data_args) {
 
     // Update with new things:
     packet.updateRecieveData(recieved_data);
-    console.log(packet.data);
-
-    packet_data = packet.data.toString();
-
-    if (api_call == 1) {
-      console.log("first api call");
-      // clean up the data into a list
-      space_index = packet_data.lastIndexOf(DELIMITER);
-      data = packet_data.slice(0, space_index);
-      data_list = data.split(DELIMITER);
-      // output the list
-      console.log(data_list);
-      print_as_bot(data_list.join(""));
-      api_call = 1;
-    } else if (api_call == 2) {
-      console.log("second api call")
-      print_as_bot(packet_data);
-      // api_call = 1;
-
-      // still display selection list incase they want to continue to see more
-      print_as_bot("Select another page?");
-      print_as_bot(data_list.join(""));
-      // print_as_bot(TOPIC_MENU);
-    }
-    console.log(api_call);
-
-    // reset the list since api has been called
-    chat_input = new Array();
-
-    // Return the information send
-    // return packet.data;
   });
+
+  console.log("RECEIVED DATA");
+  console.log(packet.data);
+  packet_data = packet.data.toString();
+
+  if (api_call == 1) {
+    console.log("first api call");
+    // clean up the data into a list
+    space_index = packet_data.lastIndexOf(DELIMITER);
+    data = packet_data.slice(0, space_index);
+    data_list = data.split(DELIMITER);
+    // output the list
+    console.log(data_list);
+    print_as_bot(data_list.join(""));
+    api_call = 1;
+  } else if (api_call == 2) {
+    console.log("second api call");
+    print_as_bot(packet_data);
+    // api_call = 1;
+
+    // still display selection list incase they want to continue to see more
+    print_as_bot("Select another page?");
+    print_as_bot(data_list.join(""));
+    // print_as_bot(TOPIC_MENU);
+  }
+  console.log(api_call);
+
+  // reset the list since api has been called
+  chat_input = new Array();
+
+  // Return the information send
+  // return packet.data;
 
   return "dying";
 }
