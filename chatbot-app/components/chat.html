@@ -39,6 +39,15 @@
       <div class="input-area">
         <input placeholder="Type message.." id="input" class="input-chat" type="text" required></input>
         <button id="send" onclick="parse();"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+        <script>
+          var input = document.getElementById("input");
+          input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              document.getElementById("send").click();
+            }
+          });
+          </script>
       </div>
     </div>
   </body>
