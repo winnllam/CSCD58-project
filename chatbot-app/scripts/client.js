@@ -28,6 +28,7 @@ const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
 const DATA_LEN = 1000;
+const DELIMITER = "|";
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
@@ -178,10 +179,8 @@ function parse() {
         } else if (input_num == 0) {
           // TODO: no filter is applied, skip straight to sending the packet over
           // TODO: maybe a try catch too?
+          chat_input.push(input_num);
           send_and_recieve(chatDataPacket, chat_input);
-          // reset the list since api has been called
-          chat_input = new Array();
-          api_call = 2;
           return;
         } else {
           // save the input selection number
@@ -193,6 +192,10 @@ function parse() {
       } else {
         // they are giving a filter value
         // any text works so just store that
+        if (text.length == 0) {
+          return;
+        }
+
         chat_input.push(text);
         console.log(chat_input);
 
@@ -234,7 +237,7 @@ function parse() {
 
 function send_and_recieve(packet, data_args) {
   // Concatenate the arguments
-  var chat_data_string = data_args.join("|");
+  var chat_data_string = data_args.join(DELIMITER);
   packet.updateProp("data", chat_data_string);
 
   // Send the packet to the server
@@ -258,6 +261,20 @@ function send_and_recieve(packet, data_args) {
 
     // Update with new things:
     packet.updateRecieveData(recieved_data);
+    console.log(packet.data);
+
+    packet_data = packet.data.toString();
+    // clean up the data into a list
+    space_index = packet_data.lastIndexOf(DELIMITER);
+    data = packet_data.slice(0, space_index);
+    data_list = data.split(DELIMITER);
+    // output the list
+    console.log(data_list);
+    print_as_bot(data_list.join(""));
+
+    // reset the list since api has been called
+    chat_input = new Array();
+    api_call = (api_call == 1 ? 2 : 1);
 
     // Return the information send
     return packet.data;
