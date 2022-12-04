@@ -324,8 +324,6 @@ class TCPPacket {
       "utf-8"
     );
 
-    console.log(encoded_data);
-
     var encoded = struct.pack(
       packetType,
       this.src_port,
@@ -339,12 +337,7 @@ class TCPPacket {
       0,
       this.options
     );
-    console.log(encoded);
     var unencrypted_decoded_data =  Buffer.concat([encoded, encoded_data]);
-    console.log(unencrypted_decoded_data);
-    console.log((unencrypted_decoded_data).length);
-    console.log(encoded.length);
-    console.log(encoded_data.length);
     var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
     return cipher.encrypt(unencrypted_decoded_data);
   }
