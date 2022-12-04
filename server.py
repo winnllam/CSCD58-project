@@ -90,6 +90,7 @@ def call_api(packet_data):
                 filter_details = TOPICS[topic][name_index]
                 filters[filter_details[0]] = value
 
+        global api
         api = OpenParlimentApi(topic, filters)
         if api.get_data() != None:
             res = list(api.get_data().values())
@@ -98,20 +99,25 @@ def call_api(packet_data):
             result = "Invalid input was detected." + DELIMITER
 
     elif len(data_list) == 1:
-        selected = int(data_list[0]) - 1
+        selected = int(data_list[0])
         # api = OpenParlimentApi('', {})
 
         if selected == 0:
             # get previous
-            res = list(api.get_prev().values())
-            result = create_list(res)
+            prev = api.get_prev()
+            if prev != None:
+                res = list(prev.values())
+                result = create_list(res)
 
         elif selected == 6:
             # get next
-            res = list(api.get_next().values())
-            result = create_list(res)
+            next = api.get_next()
+            if next != None:
+                res = list(next.values())
+                result = create_list(res)
+
         else:
-            res = api.get_sub_data(d[selected])
+            res = api.get_sub_data(d[selected - 1])
 
             # parse dictionary
             for key in res:
@@ -124,16 +130,18 @@ def call_api(packet_data):
     return result
 
 def create_list(res):
+    global d
+    d = []
     result = ''
 
-    if (api.prev_url != ""):
+    if (api.prev_url != None):
         result += "0: Previous 5 <br>" + DELIMITER
     
     for i in range(len(res)):
         result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
         d.append(res[i][URL])
 
-    if (api.next_url != ""):
+    if (api.next_url != None):
         result += "6. Next 5 <br>" + DELIMITER
     
     return result

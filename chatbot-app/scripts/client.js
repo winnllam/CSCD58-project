@@ -230,14 +230,11 @@ function parse() {
     if (input_num < 0 || input_num > 6) {
       print_as_bot(valid_number_warning);
       return;
-    } else if (input_num == 0) {
-      // TODO: hit the api to get previous list
-      // redisplay the selection list
-    } else if (input_num == 6) {
-      // TODO: hit the api to get next list
-      // redisplay the selection list
     } else {
       // TODO: call the api to get back page information
+      if (input_num == 0 || input_num == 6) {
+        api_call = 1;
+      }
       send_and_recieve(chatDataPacket, [input_num]);
       return;
 
@@ -295,7 +292,7 @@ function parse_packet(packet) {
     // output the list
     console.log(data_list);
     print_as_bot(data_list.join(""));
-    api_call = 1;
+    api_call = 2;
   } else if (api_call == 2) {
     console.log("second api call");
     print_as_bot(packet_data);
