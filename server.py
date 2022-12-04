@@ -9,7 +9,8 @@ PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 PACKET_TYPE = "!HHIIBBHHHI"
 DATA_LEN = 1000
 CTR_NONCE = b'HwxhkJKr'
-KEY = b'kHEmduHeKCCtsuWu'DELIMITER = "|"
+KEY = b'kHEmduHeKCCtsuWu'
+DELIMITER = "|"
 
 d = []
 api = OpenParlimentApi("", {})
