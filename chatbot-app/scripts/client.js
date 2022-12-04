@@ -29,6 +29,7 @@ const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
 const DATA_LEN = 1000;
+const CBC_IV = Buffer.from('bKWDch24NmLyLLAx');
 const CTR_NONCE = Buffer.from('HwxhkJKr');
 const KEY = Buffer.from('kHEmduHeKCCtsuWu');
 
@@ -338,20 +339,23 @@ class TCPPacket {
     );
     var unencrypted_decoded_data =  Buffer.concat([encoded, encoded_data]);
 
-    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
     return cipher.encrypt(unencrypted_decoded_data);
   }
 
   decode(data) {
+    //Decrypt data
+    var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
+    var decrypted_data = cipher.decrypt(data);
+
     let unpacked = struct.unpack(
       packetType,
-      Buffer.from(data.slice(0, -DATA_LEN), "hex")
+      Buffer.from(decrypted_data.slice(0, -DATA_LEN), "hex")
     );
-    let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
-    unpacked.push(recieved_data);
 
-    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
-    return cipher.encrypt(unpacked);
+    let recieved_data = decodeURIComponent(decrypted_data.slice(-DATA_LEN));
+    unpacked.push(recieved_data);
+    return unpacked;
   }
 
   updateProp(prop, newValue) {

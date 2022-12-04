@@ -2,7 +2,7 @@ import struct
 from Crypto.Cipher import AES
 PACKET_TYPE = "!HHIIBBHHHI"
 DATA_LEN = 1000
-CTR_NONCE = b'HwxhkJKr'
+CBC_IV = b'bKWDch24NmLyLLAx'
 KEY = b'kHEmduHeKCCtsuWu'
 
 
@@ -54,5 +54,5 @@ class TCPPacket:
         encoded_data = str.encode(self.data.ljust(DATA_LEN, ' '))
         unencrypted_encoded_data = struct.pack(PACKET_TYPE, self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options) + encoded_data
         # Encryption
-        cipher = AES.new(KEY, AES.MODE_CTR, nonce=CTR_NONCE)
+        cipher = AES.new(KEY, AES.MODE_CBC, CBC_IV)
         return cipher.encrypt(unencrypted_encoded_data)
