@@ -90,21 +90,24 @@ def call_api(packet_data):
                 filters[filter_details[0]] = value
 
         api = OpenParlimentApi(topic, filters)
-        res = list(api.get_data().values())
+        if api.get_data() != None:
+            res = list(api.get_data().values())
 
-        if (api.prev_url != None):
-            result += "0: Previous 5 <br>" + DELIMITER
-        
-        for i in range(len(res)):
-            result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
-            d.append(res[i][URL])
+            if (api.prev_url != None):
+                result += "0: Previous 5 <br>" + DELIMITER
+            
+            for i in range(len(res)):
+                result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
+                d.append(res[i][URL])
 
-        if (api.next_url != None):
-            result += "6. Next 5 <br>" + DELIMITER
+            if (api.next_url != None):
+                result += "6. Next 5 <br>" + DELIMITER
+        else:
+            result = "Invalid input was detected." + DELIMITER
 
     elif len(data_list) == 1:
         api = OpenParlimentApi('', {})
-        res = api.get_sub_data(d[int(data_list[0])])
+        res = api.get_sub_data(d[int(data_list[0]) - 1])
 
         # parse dictionary
         for key in res:

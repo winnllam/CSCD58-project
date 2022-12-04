@@ -67,17 +67,14 @@ const TOPICS = {
   [COMMITTEES]: [["session", "??"]],
 };
 
-const TOPIC_MENU = '<div class="chat bot-chat">' +
-  '<p>Here are the available topics to search about:</p>' +
-  '</div>' +
-  '<div class="chat bot-chat">' +
+const TOPIC_MENU_INTRO = '<p>Here are the available topics to search about:</p>';
+const TOPIC_MENU = 
   '<p>0. Exit</p>' +
   '<p>1. Bills</p>' +
   '<p>2. Votes</p>' +
   '<p>3. Politicians</p>' +
   '<p>4. Debates</p>' +
-  '<p>5. Committees</p>' +
-  '</div>';
+  '<p>5. Committees</p>';
 
 // Connection settings
 const host = "127.0.0.1";
@@ -128,6 +125,7 @@ function scroll_to_bottom() {
 var chat_input = new Array();
 var topic = "";
 var api_call = 1;
+var data_list = new Array();
 const valid_number_warning = 'Please enter a valid number!';
 const filter_value = 'What value are you filtering for?';
 
@@ -241,9 +239,10 @@ function parse() {
     } else {
       // TODO: call the api to get back page information
       send_and_recieve(chatDataPacket, [input_num]);
-      // still display selection list incase they want to continue to see more
       return;
+
       // TODO: if they dont, have an exit number to cancel this call and reset
+      // need to make exit number
     }
   }
 }
@@ -287,13 +286,16 @@ function send_and_recieve(packet, data_args) {
       // output the list
       console.log(data_list);
       print_as_bot(data_list.join(""));
-      api_call = 2;
+      api_call = 1;
     } else if (api_call == 2) {
       console.log("second api call")
       print_as_bot(packet_data);
-      api_call = 1;
+      // api_call = 1;
 
-      print_as_bot(TOPIC_MENU);
+      // still display selection list incase they want to continue to see more
+      print_as_bot("Select another page?");
+      print_as_bot(data_list.join(""));
+      // print_as_bot(TOPIC_MENU);
     }
     console.log(api_call);
 
@@ -301,8 +303,10 @@ function send_and_recieve(packet, data_args) {
     chat_input = new Array();
 
     // Return the information send
-    return packet.data;
+    // return packet.data;
   });
+
+  return "dying";
 }
 
 // Print text into the user bubble
