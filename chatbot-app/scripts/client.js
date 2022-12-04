@@ -116,6 +116,7 @@ function scroll_to_bottom() {
 var chat_input = new Array();
 var topic = "";
 var api_call = 1;
+var data_list = new Array();
 const valid_number_warning = 'Please enter a valid number!';
 const filter_value = 'What value are you filtering for?';
 
@@ -213,7 +214,9 @@ function parse() {
 
     // check if input is within range
     let input_num = parseInt(text);
-    // TODO: change to actual list length (varies from 6 to 7)
+    // if length of list is 7, then we know the prev and next are in it
+    // if length of list is  6, check first one to see if 0
+    // if so we know prev is there, if not the next is there
     if (input_num < 0 || input_num > 6) {
       print_as_bot(valid_number_warning);
       return;
@@ -225,10 +228,12 @@ function parse() {
       // redisplay the selection list
     } else {
       // TODO: call the api to get back page information
+      console.log(input_num);
+      send_and_recieve(chatDataPacket, [input_num]);
       // still display selection list incase they want to continue to see more
-
+      return;
       // TODO: if they dont, have an exit number to cancel this call and reset
-      api_call = 1;
+
     }
 
     chat_input = new Array();
@@ -264,17 +269,22 @@ function send_and_recieve(packet, data_args) {
     console.log(packet.data);
 
     packet_data = packet.data.toString();
-    // clean up the data into a list
-    space_index = packet_data.lastIndexOf(DELIMITER);
-    data = packet_data.slice(0, space_index);
-    data_list = data.split(DELIMITER);
-    // output the list
-    console.log(data_list);
-    print_as_bot(data_list.join(""));
+
+    if (api_call == 1) {
+      // clean up the data into a list
+      space_index = packet_data.lastIndexOf(DELIMITER);
+      data = packet_data.slice(0, space_index);
+      data_list = data.split(DELIMITER);
+      // output the list
+      console.log(data_list);
+      print_as_bot(data_list.join(""));
+      api_call = 2;
+    } else if (api_call == 2) {
+      api_call = 1;
+    }
 
     // reset the list since api has been called
     chat_input = new Array();
-    api_call = (api_call == 1 ? 2 : 1);
 
     // Return the information send
     return packet.data;

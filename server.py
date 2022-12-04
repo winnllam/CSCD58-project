@@ -9,6 +9,8 @@ PACKET_TYPE = "!HHIIBBHHHI"
 DATA_LEN = 1000
 DELIMITER = "|"
 
+d = []
+
 # Helper function to decode packet from byte to TCPPacket structure
 
 
@@ -97,13 +99,20 @@ def call_api(packet_data):
         
         for i in range(len(res)):
             result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
+            d.append(res[i][URL])
 
         if (api.next_url != None):
             result += "6. Next 5 <br>" + DELIMITER
 
     elif len(data_list) == 1:
-        api = OpenParlimentApi()
-        res = api.get_sub_data(data_list[0])
+        api = OpenParlimentApi('', {})
+        res = api.get_sub_data(d[int(data_list[0])])
+
+        # parse dictionary
+        for key in res:
+            # dont take the url keys since we wont be going to them anyways
+            if URL not in key:
+                result += key + DELIMITER + str(res[key]) + DELIMITER
 
     return result
 
