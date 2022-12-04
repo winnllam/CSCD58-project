@@ -1,12 +1,14 @@
 import socket
 from packet.packet import TCPPacket
+from Crypto.Cipher import AES
 import struct
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 PACKET_TYPE = "!HHIIBBHHHI"
 DATA_LEN = 1000
-
+CTR_NONCE = b'HwxhkJKr'
+KEY = b'kHEmduHeKCCtsuWu'
 # Helper function to decode packet from byte to TCPPacket structure
 
 
@@ -80,8 +82,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
 
         # Receive packet data and process it
         data, addr = s.recvfrom(1024)
-        pkt = decode_packet(data)
-        pkt_flag = decode_packet_flag_byte(data)
+        cipher = AES.new(KEY, AES.MODE_CTR, nonce=CTR_NONCE)
+        decoded_data = cipher.decrypt(data)
+        pkt = decode_packet(decoded_data)
+        pkt_flag = decode_packet_flag_byte(decoded_data)
 
         # Case 1: SYN request
         if (pkt_flag == "00000010"):
