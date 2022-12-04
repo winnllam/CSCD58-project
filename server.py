@@ -10,6 +10,7 @@ DATA_LEN = 1000
 DELIMITER = "|"
 
 d = []
+api = OpenParlimentApi("", {})
 
 # Helper function to decode packet from byte to TCPPacket structure
 
@@ -92,29 +93,49 @@ def call_api(packet_data):
         api = OpenParlimentApi(topic, filters)
         if api.get_data() != None:
             res = list(api.get_data().values())
-
-            if (api.prev_url != None):
-                result += "0: Previous 5 <br>" + DELIMITER
-            
-            for i in range(len(res)):
-                result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
-                d.append(res[i][URL])
-
-            if (api.next_url != None):
-                result += "6. Next 5 <br>" + DELIMITER
+            result = create_list(res)
         else:
             result = "Invalid input was detected." + DELIMITER
 
     elif len(data_list) == 1:
-        api = OpenParlimentApi('', {})
-        res = api.get_sub_data(d[int(data_list[0]) - 1])
+        selected = int(data_list[0]) - 1
+        # api = OpenParlimentApi('', {})
 
-        # parse dictionary
-        for key in res:
-            # dont take the url keys since we wont be going to them anyways
-            if URL not in key:
-                result += key + DELIMITER + str(res[key]) + DELIMITER
+        if selected == 0:
+            # get previous
+            res = list(api.get_prev().values())
+            result = create_list(res)
 
+        elif selected == 6:
+            # get next
+            res = list(api.get_next().values())
+            result = create_list(res)
+        else:
+            res = api.get_sub_data(d[selected])
+
+            # parse dictionary
+            for key in res:
+                # dont take the url keys since we wont be going to them anyways
+                if URL not in key:
+                    result += key + DELIMITER + str(res[key]) + DELIMITER
+
+    if result == "" :
+        return "No results found." + DELIMITER
+    return result
+
+def create_list(res):
+    result = ''
+
+    if (api.prev_url != ""):
+        result += "0: Previous 5 <br>" + DELIMITER
+    
+    for i in range(len(res)):
+        result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
+        d.append(res[i][URL])
+
+    if (api.next_url != ""):
+        result += "6. Next 5 <br>" + DELIMITER
+    
     return result
 
 
