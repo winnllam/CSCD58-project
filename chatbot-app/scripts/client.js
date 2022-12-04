@@ -130,8 +130,7 @@ var data_list = new Array();
 const valid_number_warning = "Please enter a valid number!";
 const filter_value = "What value are you filtering for?";
 
-function parse() {
-  // TODO: Determine is ack_num always 1?
+window.parse = function () {
   var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
 
   let text = document.getElementById("input").value;
@@ -242,7 +241,7 @@ function parse() {
       // need to make exit number
     }
   }
-}
+};
 
 function send_and_recieve(packet, data_args) {
   // Concatenate the arguments
@@ -273,9 +272,12 @@ function send_and_recieve(packet, data_args) {
     console.log(packet.data);
   });
 
-  setTimeout(() =>
-    parse_packet(packet)
-  , 5000);
+  // Display message to user about delay
+  print_as_bot("Getting information, one second please");
+  print_as_bot("...", true);
+  setTimeout(() => {
+    parse_packet(packet);
+  }, 5000);
 }
 
 function parse_packet(packet) {
@@ -317,9 +319,14 @@ function print_as_user(text) {
 }
 
 // Print text into a chat bot bubble
-function print_as_bot(text) {
-  document.getElementById("chat").innerHTML +=
-    '<div class="chat bot-chat"><p>' + text + "</p></div>";
+function print_as_bot(text, dot = false) {
+  if (!dot) {
+    document.getElementById("chat").innerHTML +=
+      '<div class="chat bot-chat"><p>' + text + "</p></div>";
+  } else {
+    document.getElementById("chat").innerHTML +=
+      '<div class="chat bot-chat"><span class="dot" id="dot-1"></span><span class="dot" id="dot-2"></span><span class="dot" id="dot-3"></span></span></div>';
+  }
   scroll_to_bottom();
 }
 
