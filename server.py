@@ -37,8 +37,8 @@ def decode_packet_flag_byte(data):
 def send_syn_ack(s, client_host, client_port, seq_num):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
                     seq_num=seq_num, ack_num=1, syn=1, ack=1)
-    print("SYN-ACK: The server is sending the following packet:")
-    print(pkt.encode())
+    print(f"Server is sending SYN-ACK to client {(client_host, client_port)}")
+    print(f"Data sent: {pkt.encode()}")
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
@@ -46,8 +46,8 @@ def send_syn_ack(s, client_host, client_port, seq_num):
 def send_fin_ack(s, client_host, client_port, seq_num):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
                     seq_num=seq_num, ack_num=1, fin=1, ack=1)
-    print("FIN-ACK: The server is sending the following packet:")
-    print(pkt.encode())
+    print(f"Server is sending FIN-ACK to client {(client_host, client_port)}")
+    print(f"Data sent: {pkt.encode()}")
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
@@ -55,8 +55,8 @@ def send_fin_ack(s, client_host, client_port, seq_num):
 def send_fin(s, client_host, client_port, seq_num):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
                     seq_num=seq_num, ack_num=1, fin=1)
-    print("FIN: The server is sending the following packet:")
-    print(pkt.encode())
+    print(f"Server is sending FIN to client {(client_host, client_port)}")
+    print(f"Data sent: {pkt.encode()}")
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
@@ -186,7 +186,6 @@ def create_votes_output(res):
         # not taking urls
         if URL not in key and key != "related" and key != "context_statement":
             if key == "description":
-                print(res[key]["en"])
                 result += "<b>" + key + "</b>: " + res[key]["en"] + "<br>"
             elif key == "party_votes":
                 result += "<b>" + key + "</b>: "
@@ -272,41 +271,46 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         data, addr = s.recvfrom(2500)
         cipher = AES.new(KEY, AES.MODE_CBC, CBC_IV)
         decoded_data = cipher.decrypt(data)
-        print(decoded_data)
         pkt = decode_packet(decoded_data)
         pkt_flag = decode_packet_flag_byte(decoded_data)
-        print(pkt_flag)
         # Case 1: SYN request
         if (pkt_flag == "00000010"):
+            print(f"SYN request received from {addr}")
+            print(f"Received data: {pkt.data}")
             # Syn request received, so send SYN-ACK
             send_syn_ack(s, addr[0], addr[1], pkt.seq_num+1)
             # Wait for ACK response
             ack_waiting.append(addr)
-            print("packet data")
-            print(pkt.data)
         # Case 2: ACK request
         elif (pkt_flag == "00010000" and addr in ack_waiting):
+            print(f"Handshake ACK received from {addr}")
+            print(f"Received data: {pkt.data}")
             # Establish connection, ready to receive
             ack_waiting.remove(addr)
             connections.append(addr)
-            print(connections)
         # Case 3: Received FIN request
         elif (pkt_flag == "00000001" and addr in connections):
+            print(f"FIN request received from {addr}")
+            print(f"Received data: {pkt.data}")
+            print(f"Server passive close connection with {addr}.")
             # Send ACK to client for them to enter FIN_WAIT_2
             send_fin_ack(s, addr[0], addr[1], pkt.seq_num+1)
             # Send FIN for client to enter TIME_WAIT
             send_fin(s, addr[0], addr[1], pkt.seq_num+1)
             # Passive close connection
             passive_close.append(addr)
-        # Case 4: Received FIN-AKCK
+        # Case 4: Received FIN-ACK
         elif (pkt_flag == "00010001" and addr in passive_close):
+            print(f"Second FIN request received from {addr}")
+            print(f"Received data: {pkt.data}")
+            print(f"Server closed connection with {addr}.")
             # Officially closeconnection
             passive_close.remove(addr)
             connections.remove(addr)
         # Case 5: Connection is already established
         elif (addr in connections):
-            print("Data received:")
-            print(pkt.data)
+            print(f"Received data from active connection, {addr}")
+            print(f"Received data: {pkt.data}")
             response_data = call_api(str(pkt.data))
             # Send packet back to client with necessary info
             send_response(s, addr[0], addr[1], pkt.seq_num+1, response_data)

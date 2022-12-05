@@ -80,7 +80,6 @@ class OpenParlimentApi:
         response = requests.get(url, headers=headers, params=self.params)
 
         if response.status_code == 200:
-            print("success")
             res = response.json()
             if PAGINATION in res:
                 return self.parse_data(res)
@@ -88,7 +87,6 @@ class OpenParlimentApi:
                 self.curr_data = res
                 return res
         else:
-            print("failed")
             return None
 
     # Get previous pagination output
