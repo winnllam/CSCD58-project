@@ -4,6 +4,7 @@ var aesjs = require("aes-js");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const internal = require("stream");
+const { ipcRenderer } = require("electron");
 
 // Constant variables
 const packetType = "!HHIIBBHHHI";
@@ -166,13 +167,49 @@ window.parse = function () {
         print_as_bot(valid_number_warning);
         return;
       } else {
-        // save the input selection number
-        chat_input.push(input_num);
-        console.log(chat_input);
+        // TODO: Exit and end the connection
+        if (input_num == 0) {
+          chatDataPacket.updateProp("fin", 1);
+          chatDataPacket.updateProp("cwr", 0);
+          chatDataPacket.updateProp("ece", 0);
+          chatDataPacket.updateProp("ack", 0);
+          chatDataPacket.updateProp("psh", 0);
+          chatDataPacket.updateProp("rst", 0);
+          chatDataPacket.updateProp("syn", 0);
 
-        // output the next selection menu
-        topic = LIST_OF_TOPICS[input_num - 1];
-        print_selection_menu(TOPICS[topic]);
+          console.log("Client on exit:");
+          console.log(chatDataPacket);
+          client.send(chatDataPacket.encode(), send_port, host, (err) => {});
+          console.log("Info sent");
+
+          client.on("message", function (msg, info) {
+            console.log(
+              "Received %d bytes from %s:%d\n",
+              msg.length,
+              info.address,
+              info.port
+            );
+
+            var data = chatDataPacket.decode(msg);
+
+            // Update with new things:
+            chatDataPacket.updateRecieveData(data);
+
+            // Check if the syn = ack = 1
+            if (chatDataPacket.fin == 1 && chatDataPacket.ack == 1) {
+              const ipc = ipcRenderer;
+              ipc.send("kapat");
+            }
+          });
+        } else {
+          // save the input selection number
+          chat_input.push(input_num);
+          console.log(chat_input);
+
+          // output the next selection menu
+          topic = LIST_OF_TOPICS[input_num - 1];
+          print_selection_menu(TOPICS[topic]);
+        }
         // leave since we still need the filter input before sending to server
         return;
       }
@@ -192,9 +229,14 @@ window.parse = function () {
 
         // check if the input is a valid number in terms of range
         let input_num = parseInt(text);
-        if (input_num < 0 || input_num > TOPICS[topic].length) {
+        if (input_num < -1 || input_num > TOPICS[topic].length) {
           print_as_bot(valid_number_warning);
           return;
+        } else if (input_num == -1) {
+          // they want to exit back to the topic menu
+          chat_input = new Array();
+          print_as_bot(TOPIC_MENU_INTRO);
+          print_as_bot(TOPIC_MENU);
         } else if (input_num == 0) {
           chat_input.push(input_num);
           send_and_recieve(chatDataPacket, chat_input);
@@ -231,11 +273,43 @@ window.parse = function () {
 
     // check if input is within range
     let input_num = parseInt(text);
-    // if length of list is 7, then we know the prev and next are in it
-    // if length of list is  6, check first one to see if 0
+    // if length of list is 8, then we know the prev and next are in it
+    // if length of list is 7, check first one to see if 0
     // if so we know prev is there, if not the next is there
-    if (input_num < 0 || input_num > 6) {
-      print_as_bot(valid_number_warning);
+    if (data_list.length == 8) {
+      if (input_num < -1 || input_num > 6) {
+        print_as_bot(valid_number_warning);
+        return;
+      }
+    } else if (data_list.length == 7) {
+      // figure out which of prev or next is missing
+      for (let i = 0; i < data_list.length; i++) {
+        if (data_list[i].includes("Previous")) {
+          if (input_num < -1 || input_num > 6 || input_num == 6) {
+            print_as_bot(valid_number_warning);
+            return;
+          }
+          break;
+        } else if (data_list[i].includes("Next")) {
+          if (input_num < -1 || input_num > 6 || input_num == 0) {
+            print_as_bot(valid_number_warning);
+            return;
+          }
+          break;
+        }
+      }
+    }
+
+    // if (input_num < -1 || input_num > 6) {
+    //   //TODO: might not always be 6
+    //   print_as_bot(valid_number_warning);
+    //   return;
+    // }
+    if (input_num == -1) {
+      api_call = 1;
+      chat_input = new Array();
+      print_as_bot(TOPIC_MENU_INTRO);
+      print_as_bot(TOPIC_MENU);
       return;
     } else {
       // TODO: call the api to get back page information
@@ -244,9 +318,6 @@ window.parse = function () {
       }
       send_and_recieve(chatDataPacket, [input_num]);
       return;
-
-      // TODO: if they dont, have an exit number to cancel this call and reset
-      // need to make exit number
     }
   }
 };
@@ -304,14 +375,10 @@ function parse_packet(packet) {
   } else if (api_call == 2) {
     console.log("second api call");
     print_as_bot(packet_data);
-    // api_call = 1;
-
     // still display selection list incase they want to continue to see more
     print_as_bot("Select another page?");
     print_as_bot(data_list.join(""));
-    // print_as_bot(TOPIC_MENU);
   }
-  console.log(api_call);
 
   // reset the list since api has been called
   chat_input = new Array();
@@ -339,6 +406,7 @@ function print_as_bot(text, dot = false) {
 // Print selection menu based on a dictionary
 function print_selection_menu(sub_topics) {
   let text = "Select a filter you would like to add: <br>";
+  text += "-1. Cancel <br>";
   text += "0. No filters <br>";
   for (let i = 0; i < sub_topics.length; i++) {
     text +=

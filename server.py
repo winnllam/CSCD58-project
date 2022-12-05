@@ -137,7 +137,7 @@ def call_api(packet_data):
 def create_list(res):
     global d
     d = []
-    result = ''
+    result = "-1: Cancel <br>" + DELIMITER
 
     if (api.prev_url != None):
         result += "0: Previous 5 <br>" + DELIMITER
