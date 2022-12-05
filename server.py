@@ -264,7 +264,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         decoded_data = cipher.decrypt(data)
         pkt = decode_packet(decoded_data)
         pkt_flag = decode_packet_flag_byte(decoded_data)
-        print(pkt_flag)
         # Case 1: SYN request
         if (pkt_flag == "00000010"):
             print(f"SYN request received from {addr}")
