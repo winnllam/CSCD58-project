@@ -493,8 +493,7 @@ class TCPPacket {
       this.options
     );
     var unencrypted_decoded_data = Buffer.concat([encoded, encoded_data]);
-
-    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
+    var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
     return cipher.encrypt(unencrypted_decoded_data);
   }
 
