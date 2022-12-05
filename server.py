@@ -129,6 +129,8 @@ def call_api(packet_data):
                 result = create_bills_output(res)
             elif DEBATES in ds:
                 result = create_debates_output(res)
+            elif POLITICIANS in ds:
+                result = create_politicians_output(res)
             # parse dictionary
             else:
                 for key in res:
@@ -184,6 +186,21 @@ def create_debates_output(res):
             else:
                 result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
 
+    return result
+
+
+def create_politicians_output(res):
+    result = ""
+
+    for key in res:
+        # not taking urls
+        if URL not in key and key != "image":
+            if key == "memberships":
+                result += "<b>" + "Party" + "</b>: " + \
+                    res[key][0]["party"]["short_name"]["en"] + "<br>"
+            elif key == "given_name":
+                result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
+    print("RESULT", result)
     return result
 
 

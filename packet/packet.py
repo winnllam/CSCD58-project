@@ -56,4 +56,8 @@ class TCPPacket:
             flags.encode(), base=2), 0, 0, 0, self.options) + encoded_data
         # Encryption
         cipher = AES.new(KEY, AES.MODE_CBC, CBC_IV)
+        print('DATA', self.data)
+        print('NUMBERS')
+        print(len(unencrypted_encoded_data))
+        print(len(encoded_data))
         return cipher.encrypt(unencrypted_encoded_data)
