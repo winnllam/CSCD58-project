@@ -131,6 +131,8 @@ def call_api(packet_data):
                 result = create_votes_output(res)
             elif DEBATES in ds:
                 result = create_debates_output(res)
+            elif POLITICIANS in ds:
+                result = create_politicians_output(res)
             # parse dictionary
             else:
                 for key in res:
@@ -179,19 +181,20 @@ def create_votes_output(res):
     result = ""
 
     for key in res:
-            # not taking urls
-            if URL not in key and key != "related" and key != "context_statement":
-                if key == "description":
-                    print(res[key]["en"])
-                    result += "<b>" + key + "</b>: " + res[key]["en"] + "<br>"
-                elif key == "party_votes":
-                    result += "<b>" + key + "</b>: "
-                    for party in res[key]:
-                        result += party["party"]["short_name"]["en"] + ": " + party["vote"] + ", "
-                else:
-                    result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
+        # not taking urls
+        if URL not in key and key != "related" and key != "context_statement":
+            if key == "description":
+                print(res[key]["en"])
+                result += "<b>" + key + "</b>: " + res[key]["en"] + "<br>"
+            elif key == "party_votes":
+                result += "<b>" + key + "</b>: "
+                for party in res[key]:
+                    result += party["party"]["short_name"]["en"] + \
+                        ": " + party["vote"] + ", "
+            else:
+                result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
 
-    return result    
+    return result
 
 
 def create_debates_output(res):
@@ -205,6 +208,20 @@ def create_debates_output(res):
             else:
                 result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
 
+    return result
+
+
+def create_politicians_output(res):
+    result = ""
+
+    for key in res:
+        # not taking urls
+        if URL not in key and key != "image":
+            if key == "name":
+                result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
+            elif key == "memberships":
+                result += "<b>" + "Party" + "</b>: " + \
+                    res[key][0]["party"]["short_name"]["en"] + "<br>"
     return result
 
 
