@@ -1,6 +1,6 @@
 // Import Statements
 var dgram = require("dgram");
-var aesjs = require('aes-js');
+var aesjs = require("aes-js");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const internal = require("stream");
@@ -29,9 +29,9 @@ const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
 const DATA_LEN = 1016;
-const CBC_IV = Buffer.from('bKWDch24NmLyLLAx');
-const CTR_NONCE = Buffer.from('HwxhkJKr');
-const KEY = Buffer.from('kHEmduHeKCCtsuWu');
+const CBC_IV = Buffer.from("bKWDch24NmLyLLAx");
+const CTR_NONCE = Buffer.from("HwxhkJKr", "utf-8");
+const KEY = Buffer.from("kHEmduHeKCCtsuWu", "utf-8");
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
@@ -80,8 +80,8 @@ var client = dgram.createSocket("udp4");
 client.bind(listen_port, host);
 
 window.startConnection = function () {
-  console.log("Client Send Port:")
-  console.log(send_port)
+  console.log("Client Send Port:");
+  console.log(send_port);
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
@@ -337,7 +337,7 @@ class TCPPacket {
       0,
       this.options
     );
-    var unencrypted_decoded_data =  Buffer.concat([encoded, encoded_data]);
+    var unencrypted_decoded_data = Buffer.concat([encoded, encoded_data]);
     var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
     return cipher.encrypt(unencrypted_decoded_data);
   }
@@ -352,8 +352,10 @@ class TCPPacket {
       Buffer.from(decrypted_data.slice(0, -DATA_LEN), "hex")
     );
 
-    let recieved_data = decodeURIComponent(decrypted_data.slice(-DATA_LEN));
-    unpacked.push(recieved_data);
+    let received_data = decodeURIComponent(
+      aesjs.utils.utf8.fromBytes(decrypted_data).slice(-DATA_LEN)
+    );
+    unpacked.push(received_data);
     return unpacked;
   }
 
@@ -371,6 +373,8 @@ class TCPPacket {
     this.urgent = data[packetIndices.urgent];
     this.options = data[packetIndices.options];
     this.data = data[packetIndices.data];
+    console.log("RECIEVED DATA IS");
+    console.log(this.data);
   }
 
   flags(flagNum) {

@@ -54,6 +54,7 @@ def send_fin(s, client_host, client_port, seq_num):
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
+
 def send_response(s, client_host, client_port, seq_num, response_data):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
                     seq_num=seq_num, data=response_data)
