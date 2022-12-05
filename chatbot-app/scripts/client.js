@@ -191,6 +191,23 @@ window.parse = function () {
 
             // Check if the syn = ack = 1
             if (chatDataPacket.fin == 1 && chatDataPacket.ack == 1) {
+              chatDataPacket.updateProp("fin", 1);
+              chatDataPacket.updateProp("cwr", 0);
+              chatDataPacket.updateProp("ece", 0);
+              chatDataPacket.updateProp("ack", 1);
+              chatDataPacket.updateProp("psh", 0);
+              chatDataPacket.updateProp("rst", 0);
+              chatDataPacket.updateProp("syn", 0);
+
+              console.log("Client sending ack-finish to server");
+              console.log(chatDataPacket);
+              client.send(
+                chatDataPacket.encode(),
+                send_port,
+                host,
+                (err) => {}
+              );
+
               client.close();
               const ipc = ipcRenderer;
               ipc.send("kapat");
