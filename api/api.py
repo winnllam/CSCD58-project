@@ -1,5 +1,5 @@
 import requests
-import json
+
 
 API = "http://api.openparliament.ca"
 LIMIT = "limit"
@@ -127,15 +127,3 @@ class OpenParlimentApi:
     def get_sub_data(self, key):
         url = API + key
         return self.get_data(url)
-
-
-# params = {
-#     'family_name': 'Trudeau'
-# }
-# api = OpenParlimentApi(BILLS, {})
-# text = json.dumps(api.get_data(), sort_keys=True, indent=4)
-# print(text)
-# next_text = json.dumps(api.get_next(), sort_keys=True, indent=4)
-# print(next_text)
-# sub = json.dumps(api.get_sub_data('/bills/37-1/C-40/'), sort_keys=True, indent=4)
-# print(sub)

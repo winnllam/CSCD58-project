@@ -3,7 +3,6 @@ var dgram = require("dgram");
 var aesjs = require("aes-js");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
-const internal = require("stream");
 const { ipcRenderer } = require("electron");
 
 // Constant variables
@@ -94,13 +93,12 @@ var client = dgram.createSocket("udp4");
 client.bind(listen_port, host);
 
 window.startConnection = function () {
-  console.log("SEND PORT IS " + listen_port);
+  console.log("Client port is " + listen_port);
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
   console.log(pkt);
   client.send(pkt.encode(), send_port, host, (err) => {});
-  console.log("Info sent");
 
   client.on("message", function (msg, info) {
     console.log(
@@ -118,7 +116,6 @@ window.startConnection = function () {
     // Check if the syn = ack = 1
     if (pkt.syn == 1 && pkt.ack == 1) {
       console.log("We have syn == 1 && pack == 1!");
-      console.log(pkt);
       pkt.updateProp("syn", 0);
       client.send(pkt.encode(), send_port, host, (err) => {});
     }
@@ -148,7 +145,6 @@ window.parse = function () {
     document.getElementById("input").value = "";
   }
   let input_length = chat_input.length;
-  console.log(input_length);
 
   // collection for first round of api call
   if (api_call == 1) {
@@ -167,7 +163,7 @@ window.parse = function () {
         print_as_bot(valid_number_warning);
         return;
       } else {
-        // TODO: Exit and end the connection
+        //  Exit and end the connection
         if (input_num == 0) {
           chatDataPacket.updateProp("fin", 1);
           chatDataPacket.updateProp("cwr", 0);
@@ -177,10 +173,8 @@ window.parse = function () {
           chatDataPacket.updateProp("rst", 0);
           chatDataPacket.updateProp("syn", 0);
 
-          console.log("Client on exit:");
-          console.log(chatDataPacket);
+          console.log("Client sending finish to server");
           client.send(chatDataPacket.encode(), send_port, host, (err) => {});
-          console.log("Info sent");
 
           client.on("message", function (msg, info) {
             console.log(
@@ -301,11 +295,6 @@ window.parse = function () {
       }
     }
 
-    // if (input_num < -1 || input_num > 6) {
-    //   //TODO: might not always be 6
-    //   print_as_bot(valid_number_warning);
-    //   return;
-    // }
     if (input_num == -1) {
       api_call = 1;
       chat_input = new Array();
@@ -313,7 +302,6 @@ window.parse = function () {
       print_as_bot(TOPIC_MENU);
       return;
     } else {
-      // TODO: call the api to get back page information
       if (input_num == 0 || input_num == 6) {
         api_call = 1;
       }
@@ -329,10 +317,8 @@ function send_and_recieve(packet, data_args) {
   packet.updateProp("data", chat_data_string);
 
   // Send the packet to the server
-  console.log("Client is sending the following DATA packet:");
-  console.log(packet);
+
   client.send(packet.encode(), send_port, host, (err) => {});
-  console.log("DATA Info sent");
 
   // Recieve data back
   client.on("message", function (msg, info) {
@@ -347,7 +333,6 @@ function send_and_recieve(packet, data_args) {
 
     // Update with new things:
     packet.updateRecieveData(recieved_data);
-    console.log(packet.data);
   });
 
   // Display message to user about delay
@@ -359,7 +344,6 @@ function send_and_recieve(packet, data_args) {
 }
 
 function parse_packet(packet) {
-  console.log("RECEIVED DATA");
   console.log(packet.data);
   packet_data = packet.data.toString();
 
@@ -530,8 +514,6 @@ class TCPPacket {
     this.urgent = data[packetIndices.urgent];
     this.options = data[packetIndices.options];
     this.data = data[packetIndices.data];
-    console.log("RECIEVED DATA IS");
-    console.log(this.data);
   }
 
   flags(flagNum) {
