@@ -34,36 +34,36 @@ def decode_packet_flag_byte(data):
     return flag_byte
 
 
-def send_syn_ack(s, client_host, client_port, seq_num):
+def send_syn_ack(s, client_host, client_port):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
-                    seq_num=seq_num, ack_num=1, syn=1, ack=1)
+                    seq_num=0, ack_num=1, syn=1, ack=1)
     print(f"Server is sending SYN-ACK to client {(client_host, client_port)}")
     print(f"Data sent: {pkt.encode()}")
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
 
-def send_fin_ack(s, client_host, client_port, seq_num):
+def send_fin_ack(s, client_host, client_port, client_seq_num, client_ack_num):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
-                    seq_num=seq_num, ack_num=1, fin=1, ack=1)
+                    seq_num=client_ack_num, ack_num=client_seq_num, fin=1, ack=1)
     print(f"Server is sending FIN-ACK to client {(client_host, client_port)}")
     print(f"Data sent: {pkt.encode()}")
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
 
-def send_fin(s, client_host, client_port, seq_num):
+def send_fin(s, client_host, client_port, client_seq_num, client_ack_num):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
-                    seq_num=seq_num, ack_num=1, fin=1)
+                    seq_num=client_ack_num, ack_num=client_seq_num + 1, fin=1)
     print(f"Server is sending FIN to client {(client_host, client_port)}")
     print(f"Data sent: {pkt.encode()}")
     s.sendto(pkt.encode(), (client_host, client_port))
     return
 
 
-def send_response(s, client_host, client_port, seq_num, response_data):
+def send_response(s, client_host, client_port, client_seq_num, tcp_seg_length, response_data):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
-                    seq_num=seq_num, data=response_data, ack_num=1)
+                    seq_num=0, data=response_data, ack_num=client_seq_num+tcp_seg_length)
     s.sendto(pkt.encode(), (client_host, client_port))
 
 
@@ -278,7 +278,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             print(f"SYN request received from {addr}")
             print(f"Received data: {pkt.data}")
             # Syn request received, so send SYN-ACK
-            send_syn_ack(s, addr[0], addr[1], pkt.seq_num+1)
+            send_syn_ack(s, addr[0], addr[1])
             # Wait for ACK response
             ack_waiting.append(addr)
         # Case 2: ACK request
@@ -294,9 +294,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             print(f"Received data: {pkt.data}")
             print(f"Server passive close connection with {addr}.")
             # Send ACK to client for them to enter FIN_WAIT_2
-            send_fin_ack(s, addr[0], addr[1], pkt.seq_num+1)
+            send_fin_ack(s, addr[0], addr[1], pkt.seq_num, pkt.ack_num)
             # Send FIN for client to enter TIME_WAIT
-            send_fin(s, addr[0], addr[1], pkt.seq_num+1)
+            send_fin(s, addr[0], addr[1], pkt.seq_num, pkt.ack_num)
             # Passive close connection
             passive_close.append(addr)
         # Case 4: Received FIN-ACK
@@ -313,4 +313,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             print(f"Received data: {pkt.data}")
             response_data = call_api(str(pkt.data))
             # Send packet back to client with necessary info
-            send_response(s, addr[0], addr[1], pkt.seq_num+1, response_data)
+            send_response(s, addr[0], addr[1], pkt.seq_num+1, len(pkt.data), response_data)
