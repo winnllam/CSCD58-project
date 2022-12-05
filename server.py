@@ -251,7 +251,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     ack_waiting = []
     # List of address on passive close
     passive_close = []
-    # TODO: low-prio, timeout time for ack_waiting.
     ack_timeouts = []
     while True:
         # When a packet is received it can be...
