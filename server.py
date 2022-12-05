@@ -145,9 +145,7 @@ def call_api(packet_data, port):
 
 
 def create_list(res, port):
-    # global d
     port_to_d[port] = []
-    # d = []
     result = "-1: Cancel <br>" + DELIMITER
 
     if (api.prev_url != None):
