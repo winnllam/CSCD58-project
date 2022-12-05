@@ -199,8 +199,6 @@ window.parse = function () {
               chatDataPacket.updateProp("rst", 0);
               chatDataPacket.updateProp("syn", 0);
 
-              console.log("Client sending ack-finish to server");
-              console.log(chatDataPacket);
               client.send(
                 chatDataPacket.encode(),
                 send_port,
@@ -208,7 +206,10 @@ window.parse = function () {
                 (err) => {}
               );
 
-              client.close();
+              setTimeout(() => {
+                client.close();
+              }, 5000);
+
               const ipc = ipcRenderer;
               ipc.send("kapat");
             }

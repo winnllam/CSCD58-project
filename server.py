@@ -52,15 +52,6 @@ def send_fin_ack(s, client_host, client_port, seq_num):
     return
 
 
-def send_fin(s, client_host, client_port, seq_num):
-    pkt = TCPPacket(src_port=PORT, dst_port=client_port,
-                    seq_num=seq_num, ack_num=1, fin=1)
-    print(f"Server is sending FIN to client {(client_host, client_port)}")
-    print(f"Data sent: {pkt.encode()}")
-    s.sendto(pkt.encode(), (client_host, client_port))
-    return
-
-
 def send_response(s, client_host, client_port, seq_num, response_data):
     pkt = TCPPacket(src_port=PORT, dst_port=client_port,
                     seq_num=seq_num, data=response_data, ack_num=1)
@@ -273,6 +264,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         decoded_data = cipher.decrypt(data)
         pkt = decode_packet(decoded_data)
         pkt_flag = decode_packet_flag_byte(decoded_data)
+        print(pkt_flag)
         # Case 1: SYN request
         if (pkt_flag == "00000010"):
             print(f"SYN request received from {addr}")
@@ -296,7 +288,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             # Send ACK to client for them to enter FIN_WAIT_2
             send_fin_ack(s, addr[0], addr[1], pkt.seq_num+1)
             # Send FIN for client to enter TIME_WAIT
-            send_fin(s, addr[0], addr[1], pkt.seq_num+1)
             # Passive close connection
             passive_close.append(addr)
         # Case 4: Received FIN-ACK
