@@ -1,6 +1,6 @@
 
 import json
-from api import OpenParlimentApi;
+from api import OpenParlimentApi
 from constants import (API, LIMIT, LIMIT_VAL, BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES, LIST_OF_TOPICS, TOPICS, PAGINATION, PREV, NEXT, OBJECTS, URL)
 
 # give the user a list of stuff we offer for them to know about
