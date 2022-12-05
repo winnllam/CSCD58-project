@@ -1,6 +1,6 @@
 import socket
 from packet.packet import TCPPacket
-from api.api import OpenParlimentApi, LIST_OF_TOPICS, URL, TOPICS, BILLS
+from api.api import OpenParlimentApi, LIST_OF_TOPICS, URL, TOPICS, BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES
 import struct
 
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
@@ -117,12 +117,14 @@ def call_api(packet_data):
                 result = create_list(res)
 
         else:
-            res = api.get_sub_data(d[selected - 1])
+            ds = d[selected - 1]
+            res = api.get_sub_data(ds)
 
             # parse based on the api topic
-            if BILLS in d[selected - 1]:
+            if BILLS in ds:
                 result = create_bills_output(res)
-
+            elif DEBATES in ds:
+                result = create_debates_output(res)
             # parse dictionary
             else:
                 for key in res:
@@ -165,6 +167,21 @@ def create_bills_output(res):
                 result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
 
     return result
+
+
+def create_debates_output(res):
+    result = ""
+
+    for key in res:
+        # not taking urls
+        if URL not in key and key != "related":
+            if key == "most_frequent_word":
+                result += "<b>" + key + "</b>: " + res[key]["en"] + "<br>"
+            else:
+                result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
+
+    return result
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
     s.bind((HOST, PORT))
