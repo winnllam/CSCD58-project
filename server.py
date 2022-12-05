@@ -123,7 +123,7 @@ def call_api(packet_data):
             for key in res:
                 # dont take the url keys since we wont be going to them anyways
                 if URL not in key:
-                    result += key + DELIMITER + str(res[key]) + DELIMITER
+                    result += key + ": " + str(res[key]) + "<br>"
 
     if result == "" :
         return "No results found." + DELIMITER
