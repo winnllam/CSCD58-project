@@ -294,16 +294,20 @@ window.parse = function () {
         print_as_bot(valid_number_warning);
         return;
       }
-    } else if (data_list.length == 7) {
+    } else if (data_list.length <= 7) {
+      includes_prev = 0;
+      includes_next = 0;
       // figure out which of prev or next is missing
       for (let i = 0; i < data_list.length; i++) {
         if (data_list[i].includes("Previous")) {
+          includes_prev = 1;
           if (input_num < -1 || input_num > 6 || input_num == 6) {
             print_as_bot(valid_number_warning);
             return;
           }
           break;
         } else if (data_list[i].includes("Next")) {
+          includes_next = 1;
           if (input_num < -1 || input_num > 6 || input_num == 0) {
             print_as_bot(valid_number_warning);
             return;
@@ -311,6 +315,29 @@ window.parse = function () {
           break;
         }
       }
+
+      // -1 1 2 3 4 5 6
+      // -1 0 1 2 3 4 5
+
+      if (input_num != -1) {
+        if (includes_prev == 0 && input_num == 0) {
+          // no previous button
+          print_as_bot(valid_number_warning);
+          return;
+        } else if (includes_next == 0 && input_num == 6 || input_num > data_list.length - 1) {
+          // no next option
+          print_as_bot(valid_number_warning);
+          return;
+        }
+      }
+      // neither previous or next
+      // includes_prev == 0 && includes_next == 0 &&     || (input_num == 0 || input_num == 6)
+      // if (input_num != -1 && input_num > data_list.length - 1) {
+      //   if (((includes_prev == 0 && input_num == 0) || (includes_next == 0 && input_num == 6)) && input_num > data_list.length - 1) {
+      //     print_as_bot(valid_number_warning);
+      //     return;
+      //   }
+      // }
     }
 
     if (input_num == -1) {
