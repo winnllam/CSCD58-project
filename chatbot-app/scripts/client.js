@@ -315,13 +315,16 @@ window.parse = function () {
           break;
         }
       }
-      
+
       if (input_num != -1) {
         if (includes_prev == 0 && input_num == 0) {
           // no previous button
           print_as_bot(valid_number_warning);
           return;
-        } else if (includes_next == 0 && input_num == 6 || input_num > data_list.length - 1) {
+        } else if (
+          (includes_next == 0 && input_num == 6) ||
+          input_num > data_list.length - 1
+        ) {
           // no next option
           print_as_bot(valid_number_warning);
           return;

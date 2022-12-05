@@ -15,6 +15,9 @@ DELIMITER = "|"
 d = []
 api = OpenParlimentApi("", {})
 
+port_to_parliment = {}
+port_to_d = {}
+
 # Helper function to decode packet from byte to TCPPacket structure
 
 
@@ -58,7 +61,7 @@ def send_response(s, client_host, client_port, seq_num, response_data):
     s.sendto(pkt.encode(), (client_host, client_port))
 
 
-def call_api(packet_data):
+def call_api(packet_data, port):
     # parse the packet data to get the info we need
     # it is in the format of b'...' so we can take out the first two and last character
     # the packet is padded with ' ', so we can take all those out too
@@ -85,35 +88,38 @@ def call_api(packet_data):
                 filter_details = TOPICS[topic][name_index]
                 filters[filter_details[0]] = value
 
-        global api
         api = OpenParlimentApi(topic, filters)
-        if api.get_data() != None:
-            res = list(api.get_data().values())
-            result = create_list(res)
+        port_to_parliment[port] = api
+        curr_api = port_to_parliment[port]
+        if curr_api.get_data() != None:
+            res = list(curr_api.get_data().values())
+            result = create_list(res, port)
         else:
             result = "Invalid input was detected." + DELIMITER
 
     elif len(data_list) == 1:
         selected = int(data_list[0])
         # api = OpenParlimentApi('', {})
+        curr_api = port_to_parliment[port]
 
         if selected == 0:
             # get previous
-            prev = api.get_prev()
+            prev = curr_api.get_prev()
             if prev != None:
                 res = list(prev.values())
-                result = create_list(res)
+                result = create_list(res, port)
 
         elif selected == 6:
             # get next
-            next = api.get_next()
+            next = curr_api.get_next()
             if next != None:
                 res = list(next.values())
-                result = create_list(res)
+                result = create_list(res, port)
 
         else:
-            ds = d[selected - 1]
-            res = api.get_sub_data(ds)
+            ds = port_to_d[port][selected - 1]
+            print("DS IS", ds)
+            res = curr_api.get_sub_data(ds)
 
             # parse based on the api topic
             if BILLS in ds:
@@ -138,9 +144,10 @@ def call_api(packet_data):
     return result
 
 
-def create_list(res):
-    global d
-    d = []
+def create_list(res, port):
+    # global d
+    port_to_d[port] = []
+    # d = []
     result = "-1: Cancel <br>" + DELIMITER
 
     if (api.prev_url != None):
@@ -148,7 +155,7 @@ def create_list(res):
 
     for i in range(len(res)):
         result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
-        d.append(res[i][URL])
+        port_to_d[port].append(res[i][URL])
 
     if (api.next_url != None):
         result += "6. Next 5 <br>" + DELIMITER
@@ -301,6 +308,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         elif (addr in connections):
             print(f"Received data from active connection, {addr}")
             print(f"Received data: {pkt.data}")
-            response_data = call_api(str(pkt.data))
+            response_data = call_api(str(pkt.data), addr[1])
             # Send packet back to client with necessary info
             send_response(s, addr[0], addr[1], pkt.seq_num+1, response_data)
