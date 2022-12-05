@@ -28,10 +28,11 @@ const VOTES = "votes";
 const POLITICIANS = "politicians";
 const DEBATES = "debates";
 const COMMITTEES = "committees";
-const DATA_LEN = 1000;
-const DELIMITER = "|";
+const DATA_LEN = 1016;
+const CBC_IV = Buffer.from("bKWDch24NmLyLLAx");
 const CTR_NONCE = Buffer.from("HwxhkJKr");
 const KEY = Buffer.from("kHEmduHeKCCtsuWu");
+const DELIMITER = "|";
 
 const LIST_OF_TOPICS = [BILLS, VOTES, POLITICIANS, DEBATES, COMMITTEES];
 
@@ -84,9 +85,7 @@ const TOPIC_MENU =
 const host = "127.0.0.1";
 
 // Can set dynamic port when running file: set PORT=65432&&npm start
-const send_port =
-  typeof process.env.PORT === "undefined" ? 65432 : process.env.PORT;
-
+const send_port = process.env.PORT;
 const listen_port = 65433;
 const num_options = 8;
 var client = dgram.createSocket("udp4");
@@ -433,15 +432,20 @@ class TCPPacket {
   }
 
   decode(data) {
+    //Decrypt data
+    var cipher = new aesjs.ModeOfOperation.cbc(KEY, CBC_IV);
+    var decrypted_data = cipher.decrypt(data);
+
     let unpacked = struct.unpack(
       packetType,
-      Buffer.from(data.slice(0, -DATA_LEN), "hex")
+      Buffer.from(decrypted_data.slice(0, -DATA_LEN), "hex")
     );
-    let recieved_data = decodeURIComponent(data.slice(-DATA_LEN));
-    unpacked.push(recieved_data);
 
-    var cipher = new aesjs.ModeOfOperation.ctr(KEY);
-    return cipher.encrypt(unpacked);
+    let received_data = decodeURIComponent(
+      aesjs.utils.utf8.fromBytes(decrypted_data).slice(-DATA_LEN)
+    );
+    unpacked.push(received_data);
+    return unpacked;
   }
 
   updateProp(prop, newValue) {
@@ -458,6 +462,8 @@ class TCPPacket {
     this.urgent = data[packetIndices.urgent];
     this.options = data[packetIndices.options];
     this.data = data[packetIndices.data];
+    console.log("RECIEVED DATA IS");
+    console.log(this.data);
   }
 
   flags(flagNum) {

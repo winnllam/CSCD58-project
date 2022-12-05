@@ -1,13 +1,13 @@
 import struct
 from Crypto.Cipher import AES
 PACKET_TYPE = "!HHIIBBHHHI"
-DATA_LEN = 1000
-CTR_NONCE = b'HwxhkJKr'
+DATA_LEN = 1016
+CBC_IV = b'bKWDch24NmLyLLAx'
 KEY = b'kHEmduHeKCCtsuWu'
 
 
 class TCPPacket:
-    def __init__(self, src_port, dst_port, seq_num, ack_num, cwr=int(0), ece=int(0), urg=int(0), ack=int(0), psh=int(0), rst=int(0), syn=int(0), fin=int(0), checksum=0, options=0, data=""):
+    def __init__(self, src_port, dst_port, seq_num, ack_num, cwr=int(0), ece=int(0), urg=int(0), ack=int(0), psh=int(0), rst=int(0), syn=int(0), fin=int(0), checksum=0, options=0, data=''):
         self.src_port = src_port
         self.dst_port = dst_port
         self.seq_num = seq_num
@@ -52,7 +52,8 @@ class TCPPacket:
         flags = str(self.cwr) + str(self.ece) + str(self.urg) + str(self.ack) + \
             str(self.psh) + str(self.rst) + str(self.syn) + str(self.fin)
         encoded_data = str.encode(self.data.ljust(DATA_LEN, ' '))
-        unencrypted_encoded_data = struct.pack(PACKET_TYPE, self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(flags.encode(), base=2), 0, 0, 0, self.options) + encoded_data
+        unencrypted_encoded_data = struct.pack(PACKET_TYPE, self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(
+            flags.encode(), base=2), 0, 0, 0, self.options) + encoded_data
         # Encryption
-        cipher = AES.new(KEY, AES.MODE_CTR, nonce=CTR_NONCE)
+        cipher = AES.new(KEY, AES.MODE_CBC, CBC_IV)
         return cipher.encrypt(unencrypted_encoded_data)
