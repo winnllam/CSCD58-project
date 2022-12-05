@@ -315,10 +315,7 @@ window.parse = function () {
           break;
         }
       }
-
-      // -1 1 2 3 4 5 6
-      // -1 0 1 2 3 4 5
-
+      
       if (input_num != -1) {
         if (includes_prev == 0 && input_num == 0) {
           // no previous button
@@ -330,14 +327,6 @@ window.parse = function () {
           return;
         }
       }
-      // neither previous or next
-      // includes_prev == 0 && includes_next == 0 &&     || (input_num == 0 || input_num == 6)
-      // if (input_num != -1 && input_num > data_list.length - 1) {
-      //   if (((includes_prev == 0 && input_num == 0) || (includes_next == 0 && input_num == 6)) && input_num > data_list.length - 1) {
-      //     print_as_bot(valid_number_warning);
-      //     return;
-      //   }
-      // }
     }
 
     if (input_num == -1) {
