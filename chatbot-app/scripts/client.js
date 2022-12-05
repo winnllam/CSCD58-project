@@ -3,6 +3,7 @@ var dgram = require("dgram");
 const { Buffer } = require("node:buffer");
 const struct = require("python-struct");
 const internal = require("stream");
+const { ipcRenderer } = require("electron");
 
 // Constant variables
 const packetType = "!HHIIBBHHHI";
@@ -131,7 +132,6 @@ const valid_number_warning = "Please enter a valid number!";
 const filter_value = "What value are you filtering for?";
 
 function parse() {
-  // TODO: Determine is ack_num always 1?
   var chatDataPacket = new TCPPacket(listen_port, send_port, current_seq, 1);
 
   let text = document.getElementById("input").value;
@@ -159,13 +159,49 @@ function parse() {
         print_as_bot(valid_number_warning);
         return;
       } else {
-        // save the input selection number
-        chat_input.push(input_num);
-        console.log(chat_input);
+        // TODO: Exit and end the connection
+        if (input_num == 0) {
+          chatDataPacket.updateProp("fin", 1);
+          chatDataPacket.updateProp("cwr", 0);
+          chatDataPacket.updateProp("ece", 0);
+          chatDataPacket.updateProp("ack", 0);
+          chatDataPacket.updateProp("psh", 0);
+          chatDataPacket.updateProp("rst", 0);
+          chatDataPacket.updateProp("syn", 0);
 
-        // output the next selection menu
-        topic = LIST_OF_TOPICS[input_num - 1];
-        print_selection_menu(TOPICS[topic]);
+          console.log("Client on exit:");
+          console.log(chatDataPacket);
+          client.send(chatDataPacket.encode(), send_port, host, (err) => {});
+          console.log("Info sent");
+
+          client.on("message", function (msg, info) {
+            console.log(
+              "Received %d bytes from %s:%d\n",
+              msg.length,
+              info.address,
+              info.port
+            );
+
+            var data = chatDataPacket.decode(msg);
+
+            // Update with new things:
+            chatDataPacket.updateRecieveData(data);
+
+            // Check if the syn = ack = 1
+            if (chatDataPacket.fin == 1 && chatDataPacket.ack == 1) {
+              const ipc = ipcRenderer;
+              ipc.send("kapat");
+            }
+          });
+        } else {
+          // save the input selection number
+          chat_input.push(input_num);
+          console.log(chat_input);
+
+          // output the next selection menu
+          topic = LIST_OF_TOPICS[input_num - 1];
+          print_selection_menu(TOPICS[topic]);
+        }
         // leave since we still need the filter input before sending to server
         return;
       }
@@ -307,9 +343,7 @@ function send_and_recieve(packet, data_args) {
     console.log(packet.data);
   });
 
-  setTimeout(() =>
-    parse_packet(packet)
-  , 5000);
+  setTimeout(() => parse_packet(packet), 5000);
 }
 
 function parse_packet(packet) {
@@ -356,7 +390,7 @@ function print_as_bot(text) {
 // Print selection menu based on a dictionary
 function print_selection_menu(sub_topics) {
   let text = "Select a filter you would like to add: <br>";
-  text += "-1. Cancel <br>"
+  text += "-1. Cancel <br>";
   text += "0. No filters <br>";
   for (let i = 0; i < sub_topics.length; i++) {
     text +=

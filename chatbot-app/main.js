@@ -1,8 +1,9 @@
 // main.js
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
+const ipc = ipcMain;
 
 const createWindow = () => {
   // Create the browser window.
@@ -17,11 +18,15 @@ const createWindow = () => {
   });
 
   // and load the index.html of the app.
+  ipc.on("kapat", () => {
+    app.quit();
+  });
   mainWindow.loadFile("components/home.html");
   mainWindow.openDevTools();
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
+  // win.loadFile('girisEkrani.html')
 };
 
 // This method will be called when Electron has finished
