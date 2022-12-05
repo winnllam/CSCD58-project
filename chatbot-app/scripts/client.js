@@ -86,17 +86,14 @@ const TOPIC_MENU =
 const host = "127.0.0.1";
 
 // Can set dynamic port when running file: set PORT=65432&&npm start
-const send_port = process.env.PORT == null ? 65432 : parseInt(process.env.PORT);
-console.log("SEND PORT IS " + send_port);
-
-const listen_port = 65433;
+const send_port = 65432;
+const listen_port = process.env.PORT == null ? 65433 : parseInt(process.env.PORT);
 const num_options = 8;
 var client = dgram.createSocket("udp4");
 client.bind(listen_port, host);
 
 window.startConnection = function () {
-  console.log("Client Send Port:");
-  console.log(send_port);
+  console.log("SEND PORT IS " + listen_port);
   var pkt = new TCPPacket(listen_port, send_port, 1, 1);
   pkt.updateProp("syn", 1);
   console.log("Client is sending the following packet:");
