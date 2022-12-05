@@ -133,6 +133,8 @@ def call_api(packet_data):
                 result = create_debates_output(res)
             elif POLITICIANS in ds:
                 result = create_politicians_output(res)
+            elif COMMITTEES in ds:
+                result = create_committees_output(res)
             # parse dictionary
             else:
                 for key in res:
@@ -224,6 +226,25 @@ def create_politicians_output(res):
                     res[key][0]["riding"]["name"]["en"] + "<br>"
                 result += "<b>" + "Party" + "</b>: " + \
                     res[key][0]["party"]["short_name"]["en"] + "<br>"
+    return result
+
+
+def create_committees_output(res):
+    result = ""
+
+    for key in res:
+        # not taking video urls
+        if key == "name":
+            result += "<b>" + "Name" + "</b>: " + str(res[key]["en"]) + "<br>"
+            result += "<ol>"
+        elif key == "sessions":
+            for obj in res[key]:
+                for item in obj:
+                    if item == "session":
+                        result += "<li>" + "Session" + ": " + \
+                            str(obj[item]) + "</li>"
+            result += "</ol>"
+
     return result
 
 

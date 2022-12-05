@@ -34,16 +34,17 @@ TOPICS = {
     POLITICIANS: [
         ["family_name", "ex. Harper"],
         ["given_name", "ex. Stephen"],
-        ["include", "'former' to show former MPs (since 94), 'all' for current and former"],
+        ["include",
+            "'former' to show former MPs (since 94), 'all' for current and former"],
         ["name", "ex. Stephen Harper"]
     ],
     DEBATES: [
         ["date", "ex. 2010-01-01"],
-        ["number","Each Hansard in a session is given a sequential #"],
+        ["number", "Each Hansard in a session is given a sequential #"],
         ["session", "ex. 41-1"]
     ],
     COMMITTEES: [
-        ["session", "??"]
+        ["session", "Session number, ex. 41-1"]
     ]
 }
 
@@ -54,29 +55,30 @@ NEXT = "next_url"
 OBJECTS = "objects"
 URL = "url"
 
+
 class OpenParlimentApi:
     endpoint = ''
     params = {}
     prev_url = ''
     next_url = ''
     curr_data = {}
-    
+
     def __init__(self, endpoint, params):
         self.endpoint = endpoint
         self.params = params
         self.params[LIMIT] = LIMIT_VAL
-    
+
     # Main function to call the Open Parliment API, returns result (maybe parsed)
     def get_data(self, url=''):
         if url == '':
             url = API + "/" + self.endpoint
-        
+
         headers = {
-            'Content-type': 'application/json', 
+            'Content-type': 'application/json',
             'Accept': 'text/plain'
         }
         response = requests.get(url, headers=headers, params=self.params)
-        
+
         if response.status_code == 200:
             print("success")
             res = response.json()
@@ -85,7 +87,7 @@ class OpenParlimentApi:
             else:
                 self.curr_data = res
                 return res
-        else:    
+        else:
             print("failed")
             return None
 
@@ -102,7 +104,7 @@ class OpenParlimentApi:
             url = API + self.next_url
             return self.get_data(url)
         return None
-         
+
     # Parse filtered data output (into dict and store other relevant into from the call)
     def parse_data(self, data):
         parsed = {}
@@ -112,7 +114,7 @@ class OpenParlimentApi:
         self.next_url = data[PAGINATION][NEXT]
         # get the actual content out
         objects = data[OBJECTS]
-        
+
         # make URL the key (works for all)
         for item in objects:
             key = item[URL]
@@ -125,7 +127,6 @@ class OpenParlimentApi:
     def get_sub_data(self, key):
         url = API + key
         return self.get_data(url)
-        
 
 
 # params = {

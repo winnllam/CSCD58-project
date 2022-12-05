@@ -69,7 +69,7 @@ const TOPICS = {
     ["number", "Each Hansard in a session is given a sequential #"],
     ["session", "ex. 41-1"],
   ],
-  [COMMITTEES]: [["session", "??"]],
+  [COMMITTEES]: [["session", "Session number, ex. 41-1"]],
 };
 
 const TOPIC_MENU_INTRO =
