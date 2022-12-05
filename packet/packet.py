@@ -55,6 +55,5 @@ class TCPPacket:
         unencrypted_encoded_data = struct.pack(PACKET_TYPE, self.src_port, self.dst_port, self.seq_num, self.ack_num, 0, int(
             flags.encode(), base=2), 0, 0, 0, self.options) + encoded_data
         # Encryption
-        print("LEN OF UNENCODED IS", len(unencrypted_encoded_data))
         cipher = AES.new(KEY, AES.MODE_CBC, CBC_IV)
         return cipher.encrypt(unencrypted_encoded_data)

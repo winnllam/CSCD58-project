@@ -218,8 +218,10 @@ def create_politicians_output(res):
         # not taking urls
         if URL not in key and key != "image":
             if key == "name":
-                result += "<b>" + key + "</b>: " + str(res[key]) + "<br>"
+                result += "<b>" + "Name" + "</b>: " + str(res[key]) + "<br>"
             elif key == "memberships":
+                result += "<b>" + "Riding" + "</b>: " + \
+                    res[key][0]["riding"]["name"]["en"] + "<br>"
                 result += "<b>" + "Party" + "</b>: " + \
                     res[key][0]["party"]["short_name"]["en"] + "<br>"
     return result

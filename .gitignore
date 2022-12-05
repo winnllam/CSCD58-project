@@ -1,0 +1,10 @@
+node_modules
+api/__pycache__/
+packet/__pycache__/*
+
+*.pyc
+*.d
+*.out
+*.pyo
+*.pcap
+.vscode
