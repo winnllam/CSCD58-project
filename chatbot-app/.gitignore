@@ -1,1 +1,3 @@
 node_modules
+api/__pycache__/
+packet/__pycache__/
