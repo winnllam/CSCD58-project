@@ -197,6 +197,7 @@ window.parse = function () {
 
             // Check if the syn = ack = 1
             if (chatDataPacket.fin == 1 && chatDataPacket.ack == 1) {
+              client.close();
               const ipc = ipcRenderer;
               ipc.send("kapat");
             }
