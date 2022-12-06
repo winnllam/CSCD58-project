@@ -44,7 +44,6 @@ class TCPPacket:
     # I Options + Padding - 4 bytes unsighed int
     # I Data - 4 bytes unsighed int TODO: allocate more space, maybe type should be s (char)
 
-    # TODO: we may want to lower sized of *UNUSED* since it's irrelevant to our implementation.
     # Focus is in TCP handshake and encryption, not other optimization methods.
 
     def encode(self):

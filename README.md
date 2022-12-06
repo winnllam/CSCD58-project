@@ -4,6 +4,8 @@ Fall 2022 Project
 
 Link to Video Presentation: [OneDrive Link (Sign-In Required)](https://utoronto-my.sharepoint.com/:v:/g/personal/jtony_cao_mail_utoronto_ca/EXIOmz8IUqdDk0KYvRSeI8UBAFTWQ79CIDsMmTBcBHJgxg?e=rgwAwJ)
 
+> Original MP4 video included as well
+
 # Table of Contents
 
 1. [Team Members](#team-members)
@@ -106,6 +108,8 @@ npm install
 ```
 
 ### Launching the Application
+
+> IMPORTANT: Server **MUST** be running before any client instances are launched
 
 **Server**
 
