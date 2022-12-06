@@ -12,8 +12,6 @@ CBC_IV = b'bKWDch24NmLyLLAx'
 KEY = b'kHEmduHeKCCtsuWu'
 DELIMITER = "|"
 
-d = []
-api = OpenParlimentApi("", {})
 
 port_to_parliment = {}
 port_to_d = {}
@@ -93,7 +91,7 @@ def call_api(packet_data, port):
         curr_api = port_to_parliment[port]
         if curr_api.get_data() != None:
             res = list(curr_api.get_data().values())
-            result = create_list(res, port)
+            result = create_list(res, port, api)
         else:
             result = "Invalid input was detected." + DELIMITER
 
@@ -107,14 +105,14 @@ def call_api(packet_data, port):
             prev = curr_api.get_prev()
             if prev != None:
                 res = list(prev.values())
-                result = create_list(res, port)
+                result = create_list(res, port, curr_api)
 
         elif selected == 6:
             # get next
             next = curr_api.get_next()
             if next != None:
                 res = list(next.values())
-                result = create_list(res, port)
+                result = create_list(res, port, curr_api)
 
         else:
             ds = port_to_d[port][selected - 1]
@@ -144,18 +142,17 @@ def call_api(packet_data, port):
     return result
 
 
-def create_list(res, port):
+def create_list(res, port, api):
     port_to_d[port] = []
     result = "-1: Cancel <br>" + DELIMITER
-
-    if (api.prev_url != None):
+    if (api.prev_url != None and api.prev_url != ""):
         result += "0: Previous 5 <br>" + DELIMITER
 
     for i in range(len(res)):
         result += str(i + 1) + ". " + res[i][URL] + "<br>" + DELIMITER
         port_to_d[port].append(res[i][URL])
 
-    if (api.next_url != None):
+    if (api.next_url != None and api.next_url != ""):
         result += "6. Next 5 <br>" + DELIMITER
 
     return result
